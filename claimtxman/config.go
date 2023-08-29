@@ -11,4 +11,6 @@ type Config struct {
 	// PrivateKey defines the key store file that is going
 	// to be read in order to provide the private key to sign the claim txs
 	PrivateKey types.KeystoreFileConfig `mapstructure:"PrivateKey"`
+	// FreeGas enabled whether gas price is 0
+	FreeGas bool `mapstructure:"FreeGas"`
 }

@@ -15,6 +15,7 @@ MaxConns = 20
 Enabled = true
 FrequencyToMonitorTxs = "1s"
 PrivateKey = {Path = "/pk/keystore.claimtxmanager", Password = "testonly"}
+FreeGas = true
 
 [Etherman]
 L1URL = "http://zkevm-mock-l1-network:8545"
