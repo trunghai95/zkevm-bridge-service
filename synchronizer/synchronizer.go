@@ -527,7 +527,7 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 			GlobalExitRoot: sbatch.GlobalExitRoot,
 			Timestamp:      time.Unix(int64(sbatch.Timestamp), 0),
 			Coinbase:       sbatch.Sequencer,
-			BatchL2Data:    sbatch.Transactions,
+			BatchL2Data:    nil, //zhujianguo todo
 		}
 		// ForcedBatches must be processed
 		if sbatch.MinForcedTimestamp > 0 {
@@ -553,8 +553,8 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 				return fmt.Errorf("networkID: %d, error: empty forcedBatches array read from db. BatchNumber: %d", s.networkID, batch.BatchNumber)
 			}
 			if uint64(forcedBatches[0].ForcedAt.Unix()) != sbatch.MinForcedTimestamp ||
-				forcedBatches[0].GlobalExitRoot != sbatch.GlobalExitRoot ||
-				common.Bytes2Hex(forcedBatches[0].RawTxsData) != common.Bytes2Hex(sbatch.Transactions) {
+				forcedBatches[0].GlobalExitRoot != sbatch.GlobalExitRoot {
+				// common.Bytes2Hex(forcedBatches[0].RawTxsData) != common.Bytes2Hex(sbatch.Transactions)  // todo check
 				log.Errorf("networkID: %d, error: forcedBatch received doesn't match with the next expected forcedBatch stored in db. Expected: %+v, Synced: %+v", s.networkID, forcedBatches, sbatch)
 				rollbackErr := dbTx.Rollback(s.ctx)
 				if rollbackErr != nil {
