@@ -45,6 +45,7 @@ type Deposit struct {
 	Metadata           []byte
 	// it is only used for the bridge service
 	ReadyForClaim bool
+	ReceivedAt    time.Time
 }
 
 // Claim struct

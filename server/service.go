@@ -340,3 +340,52 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 		},
 	}, nil
 }
+
+// GetCoinPrice returns the price for each coin symbol in the request
+// Bridge rest API endpoint
+func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
+	// TODO: Implement
+	return nil, nil
+}
+
+// GetMainCoins returns the info of the main coins in a network
+// Bridge rest API endpoint
+func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.GetMainCoinsResponse, error) {
+	// TODO: Implement
+	return nil, nil
+}
+
+// GetPendingTransactions returns the pending transactions of an account
+func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.GetPendingTransactionsResponse, error) {
+	limit := req.Limit
+	if limit == 0 {
+		limit = s.defaultPageLimit
+	}
+	if limit > s.maxPageLimit {
+		limit = s.maxPageLimit
+	}
+	deposits, err := s.storage.GetPendingTransactions(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbTransactions []*pb.Transaction
+	for _, deposit := range deposits {
+		transaction := &pb.Transaction{
+			FromChain:   uint32(deposit.NetworkID),
+			ToChain:     uint32(deposit.DestinationNetwork),
+			BridgeToken: deposit.OriginalAddress.Hex(),
+			TokenAmount: deposit.Amount.String(),
+			Time:        uint64(deposit.ReceivedAt.Unix()),
+			TxHash:      deposit.TxHash.String(),
+		}
+		transaction.Status = 0
+		if deposit.ReadyForClaim {
+			transaction.Status = 1
+		}
+		pbTransactions = append(pbTransactions, transaction)
+	}
+	return &pb.GetPendingTransactionsResponse{
+		Transactions: pbTransactions,
+	}, nil
+}

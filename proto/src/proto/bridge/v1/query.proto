@@ -52,6 +52,27 @@ service BridgeService {
             get: "/tokenwrapped"
         };
     }
+
+    /// Get the latest price of the specified coins
+    rpc GetCoinPrice(GetCoinPriceRequest) returns (GetCoinPriceResponse) {
+        option (google.api.http) = {
+            get: "/coin-price"
+        };
+    }
+
+    /// Get the list of all the main coins of a specified network
+    rpc GetMainCoins(GetMainCoinsRequest) returns (GetMainCoinsResponse) {
+        option (google.api.http) = {
+            get: "/main-coins/{network_id}"
+        };
+    }
+
+    /// Get the pending (not claimed) transactions of an account
+    rpc GetPendingTransactions(GetPendingTransactionsRequest) returns (GetPendingTransactionsResponse) {
+        option (google.api.http) = {
+            get: "/pending/{dest_addr}"
+        };
+    }
 }
 
 // TokenWrapped message
@@ -101,6 +122,43 @@ message Proof {
     string rollup_exit_root = 3;
 }
 
+// Symbol info message
+message SymbolInfo {
+    uint64 chain_id = 1;
+    string address = 2;
+}
+
+message SymbolPrice {
+    string symbol = 1;
+    double price = 2;
+    uint64 time = 3;
+    string address = 4;
+    uint64 chain_id = 5;
+}
+
+// Coin info message
+message CoinInfo {
+    string symbol = 1;
+    string name = 2;
+    uint64 decimals = 3;
+    uint64 chain_id = 4;
+    uint32 network_id = 5;
+    string logo_link = 6;
+    string address = 7;
+}
+
+// Transaction message
+message Transaction {
+    uint32 from_chain = 1;
+    uint32 to_chain = 2;
+    string bridge_token = 3;
+    string token_amount = 4;
+    string estimate_time = 5;
+    uint32 status = 6;
+    uint64 time = 7;
+    string tx_hash = 8;
+}
+
 // Get requests
 
 message CheckAPIRequest {}
@@ -132,6 +190,22 @@ message GetClaimsRequest {
     uint32 limit = 3;
 }
 
+message GetCoinPriceRequest {
+    repeated SymbolInfo symbols = 1;
+}
+
+message GetMainCoinsRequest {
+    uint32 network_id = 1;
+    uint64 offset = 2;
+    uint32 limit = 3;
+}
+
+message GetPendingTransactionsRequest {
+    string dest_addr = 1;
+    uint64 offset = 2;
+    uint32 limit = 3;
+}
+
 // Get responses
 
 message CheckAPIResponse {
@@ -158,4 +232,16 @@ message GetBridgeResponse {
 message GetClaimsResponse {
     repeated Claim claims = 1;
     uint64 total_cnt = 2;
+}
+
+message GetCoinPriceResponse {
+    repeated SymbolPrice prices = 1;
+}
+
+message GetMainCoinsResponse {
+    repeated CoinInfo coin_infos = 1;
+}
+
+message GetPendingTransactionsResponse {
+    repeated Transaction transactions = 1;
 }
