@@ -45,6 +45,11 @@ BridgeVersion = "v1"
     Host = "zkevm-bridge-db"
     Port = "5432"
     MaxConns = 20
+    [BridgeServer.Redis]
+    Addr = "localhost:6379"
+    Username = ""
+    Password = ""
+    DB = 0
 
 [NetworkConfig]
 GenBlockNumber = 1
