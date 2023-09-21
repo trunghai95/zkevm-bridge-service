@@ -3,8 +3,8 @@ package localcache
 import (
 	"context"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
-	"github.com/0xPolygonHermez/zkevm-bridge-service/server"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 	"sync"
 	"time"
@@ -21,20 +21,29 @@ type MainCoinsCache interface {
 	GetMainCoinsByNetwork(ctx context.Context, networkID uint32, limit uint, offset uint) ([]*pb.CoinInfo, error)
 }
 
+type MainCoinsDBStorage interface {
+	GetAllMainCoins(ctx context.Context, limit uint, offset uint, dbTx pgx.Tx) ([]*pb.CoinInfo, error)
+}
+
 // mainCoinsCacheImpl implements the MainCoinsCache interface
 type mainCoinsCacheImpl struct {
 	lock    sync.RWMutex
 	data    map[uint32][]*pb.CoinInfo // networkID -> list of coins
-	storage server.BridgeServiceStorage
+	storage MainCoinsDBStorage
 }
 
-func NewMainCoinsCache(storage server.BridgeServiceStorage) (MainCoinsCache, error) {
+func NewMainCoinsCache(storage interface{}) (MainCoinsCache, error) {
 	if storage == nil {
 		return nil, errors.New("NewMainCoinsCache storage is nil")
 	}
 	cache := &mainCoinsCacheImpl{
 		data:    make(map[uint32][]*pb.CoinInfo),
-		storage: storage,
+		storage: storage.(MainCoinsDBStorage),
+	}
+	err := cache.doRefresh(context.Background())
+	if err != nil {
+		log.Errorf("init main coins cache err[%v]", err)
+		return nil, err
 	}
 	go cache.Refresh(context.Background())
 	return cache, nil

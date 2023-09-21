@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
 	"os"
 	"os/signal"
@@ -81,12 +82,19 @@ func start(ctx *cli.Context) error {
 		log.Error(err)
 		return err
 	}
+
 	redisStorage, err := redisstorage.NewRedisStorage(c.BridgeServer.Redis)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	bridgeService := server.NewBridgeService(c.BridgeServer, c.BridgeController.Height, networkIDs, apiStorage, redisStorage)
+
+	mainCoinsCache, err := localcache.NewMainCoinsCache(apiStorage)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	bridgeService := server.NewBridgeService(c.BridgeServer, c.BridgeController.Height, networkIDs, apiStorage, redisStorage, mainCoinsCache)
 	err = server.RunServer(c.BridgeServer, bridgeService)
 	if err != nil {
 		log.Error(err)
