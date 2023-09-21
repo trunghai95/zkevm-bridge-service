@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl"
@@ -16,8 +17,9 @@ import (
 )
 
 type bridgeService struct {
-	storage          bridgeServiceStorage
+	storage          BridgeServiceStorage
 	redisStorage     redisstorage.RedisStorage
+	mainCoinsCache   localcache.MainCoinsCache
 	networkIDs       map[uint]uint8
 	height           uint8
 	defaultPageLimit uint32
@@ -28,7 +30,7 @@ type bridgeService struct {
 }
 
 // NewBridgeService creates new bridge service.
-func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}, redisStorage redisstorage.RedisStorage) *bridgeService {
+func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
 	var networkIDs = make(map[uint]uint8)
 	for i, network := range networks {
 		networkIDs[network] = uint8(i)
@@ -38,8 +40,9 @@ func NewBridgeService(cfg Config, height uint8, networks []uint, storage interfa
 		panic(err)
 	}
 	return &bridgeService{
-		storage:          storage.(bridgeServiceStorage),
+		storage:          storage.(BridgeServiceStorage),
 		redisStorage:     redisStorage,
+		mainCoinsCache:   mainCoinsCache,
 		height:           height,
 		networkIDs:       networkIDs,
 		defaultPageLimit: cfg.DefaultPageLimit,
@@ -359,8 +362,20 @@ func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRe
 // GetMainCoins returns the info of the main coins in a network
 // Bridge rest API endpoint
 func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.GetMainCoinsResponse, error) {
-	// TODO: Implement
-	return nil, nil
+	limit := req.Limit
+	if limit == 0 {
+		limit = s.defaultPageLimit
+	}
+	if limit > s.maxPageLimit {
+		limit = s.maxPageLimit
+	}
+	coins, err := s.mainCoinsCache.GetMainCoinsByNetwork(ctx, req.NetworkId, uint(limit), uint(req.Offset))
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetMainCoinsResponse{
+		CoinInfos: coins,
+	}, nil
 }
 
 // GetPendingTransactions returns the pending transactions of an account
