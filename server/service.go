@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
@@ -16,6 +17,7 @@ import (
 
 type bridgeService struct {
 	storage          bridgeServiceStorage
+	redisStorage     redisstorage.RedisStorage
 	networkIDs       map[uint]uint8
 	height           uint8
 	defaultPageLimit uint32
@@ -26,7 +28,7 @@ type bridgeService struct {
 }
 
 // NewBridgeService creates new bridge service.
-func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}) *bridgeService {
+func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}, redisStorage redisstorage.RedisStorage) *bridgeService {
 	var networkIDs = make(map[uint]uint8)
 	for i, network := range networks {
 		networkIDs[network] = uint8(i)
@@ -37,6 +39,7 @@ func NewBridgeService(cfg Config, height uint8, networks []uint, storage interfa
 	}
 	return &bridgeService{
 		storage:          storage.(bridgeServiceStorage),
+		redisStorage:     redisStorage,
 		height:           height,
 		networkIDs:       networkIDs,
 		defaultPageLimit: cfg.DefaultPageLimit,
@@ -344,8 +347,13 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 // GetCoinPrice returns the price for each coin symbol in the request
 // Bridge rest API endpoint
 func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
-	// TODO: Implement
-	return nil, nil
+	priceList, err := s.redisStorage.GetCoinPrice(ctx, req.Symbols)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetCoinPriceResponse{
+		Prices: priceList,
+	}, nil
 }
 
 // GetMainCoins returns the info of the main coins in a network
