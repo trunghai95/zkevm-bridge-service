@@ -51,6 +51,12 @@ BridgeVersion = "v1"
     Password = ""
     DB = 0
 
+[CoinKafkaConsumer]
+Brokers = ["localhost:9092"]
+Topics = ["ConsumerGroupHandler"]
+ConsumerGroupID = "zkevm-bridge-service"
+InitialOffset = -1
+
 [NetworkConfig]
 GenBlockNumber = 1
 PolygonBridgeAddress = "0xff0EE8ea08cEf5cb4322777F5CC3E8A584B8A4A0"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/0xPolygonHermez/zkevm-bridge-service/coinmiddleware"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
 	"os"
@@ -100,6 +101,20 @@ func start(ctx *cli.Context) error {
 		log.Error(err)
 		return err
 	}
+
+	// Start the coin middleware kafka consumer
+	coinKafkaConsumer, err := coinmiddleware.NewKafkaConsumer(c.CoinKafkaConsumer, redisStorage)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	go coinKafkaConsumer.Start(ctx.Context)
+	defer func() {
+		err := coinKafkaConsumer.Close()
+		if err != nil {
+			log.Errorf("close kafka consumer error: %v", err)
+		}
+	}()
 
 	log.Debug("trusted sequencer URL ", c.Etherman.L2URLs[0])
 	zkEVMClient := client.NewClient(c.Etherman.L2URLs[0])
