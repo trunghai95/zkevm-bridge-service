@@ -18,7 +18,7 @@ const (
 
 type MainCoinsCache interface {
 	Refresh(ctx context.Context)
-	GetMainCoinsByNetwork(ctx context.Context, networkID uint32, limit uint, offset uint) ([]*pb.CoinInfo, error)
+	GetMainCoinsByNetwork(ctx context.Context, networkID uint32) ([]*pb.CoinInfo, error)
 }
 
 type MainCoinsDBStorage interface {
@@ -100,19 +100,9 @@ func (c *mainCoinsCacheImpl) doRefresh(ctx context.Context) error {
 	return nil
 }
 
-func (c *mainCoinsCacheImpl) GetMainCoinsByNetwork(ctx context.Context, networkID uint32, limit uint, offset uint) ([]*pb.CoinInfo, error) {
+func (c *mainCoinsCacheImpl) GetMainCoinsByNetwork(ctx context.Context, networkID uint32) ([]*pb.CoinInfo, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	data := c.data[networkID]
-	if offset >= uint(len(data)) || limit <= 0 {
-		return []*pb.CoinInfo{}, nil
-	}
-
-	bound := offset + limit
-	if bound > uint(len(data)) {
-		bound = uint(len(data))
-	}
-
-	return data[offset:bound], nil
+	return c.data[networkID], nil
 }

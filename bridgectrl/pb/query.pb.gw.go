@@ -333,10 +333,6 @@ func local_request_BridgeService_GetCoinPrice_0(ctx context.Context, marshaler r
 
 }
 
-var (
-	filter_BridgeService_GetMainCoins_0 = &utilities.DoubleArray{Encoding: map[string]int{"network_id": 0, "networkId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
-)
-
 func request_BridgeService_GetMainCoins_0(ctx context.Context, marshaler runtime.Marshaler, client BridgeServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetMainCoinsRequest
 	var metadata runtime.ServerMetadata
@@ -348,21 +344,14 @@ func request_BridgeService_GetMainCoins_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["network_id"]
+	val, ok = pathParams["networkId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "network_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "networkId")
 	}
 
 	protoReq.NetworkId, err = runtime.Uint32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "network_id", err)
-	}
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BridgeService_GetMainCoins_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "networkId", err)
 	}
 
 	msg, err := client.GetMainCoins(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -381,21 +370,14 @@ func local_request_BridgeService_GetMainCoins_0(ctx context.Context, marshaler r
 		_   = err
 	)
 
-	val, ok = pathParams["network_id"]
+	val, ok = pathParams["networkId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "network_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "networkId")
 	}
 
 	protoReq.NetworkId, err = runtime.Uint32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "network_id", err)
-	}
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BridgeService_GetMainCoins_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "networkId", err)
 	}
 
 	msg, err := server.GetMainCoins(ctx, &protoReq)
@@ -404,7 +386,7 @@ func local_request_BridgeService_GetMainCoins_0(ctx context.Context, marshaler r
 }
 
 var (
-	filter_BridgeService_GetPendingTransactions_0 = &utilities.DoubleArray{Encoding: map[string]int{"dest_addr": 0, "destAddr": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+	filter_BridgeService_GetPendingTransactions_0 = &utilities.DoubleArray{Encoding: map[string]int{"destAddr": 0}, Base: []int{1, 2, 0, 0}, Check: []int{0, 1, 2, 2}}
 )
 
 func request_BridgeService_GetPendingTransactions_0(ctx context.Context, marshaler runtime.Marshaler, client BridgeServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -418,14 +400,14 @@ func request_BridgeService_GetPendingTransactions_0(ctx context.Context, marshal
 		_   = err
 	)
 
-	val, ok = pathParams["dest_addr"]
+	val, ok = pathParams["destAddr"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "dest_addr")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "destAddr")
 	}
 
 	protoReq.DestAddr, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "dest_addr", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "destAddr", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -451,14 +433,14 @@ func local_request_BridgeService_GetPendingTransactions_0(ctx context.Context, m
 		_   = err
 	)
 
-	val, ok = pathParams["dest_addr"]
+	val, ok = pathParams["destAddr"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "dest_addr")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "destAddr")
 	}
 
 	protoReq.DestAddr, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "dest_addr", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "destAddr", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -662,7 +644,7 @@ func RegisterBridgeServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/bridge.v1.BridgeService/GetMainCoins", runtime.WithHTTPPathPattern("/main-coins/{network_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/bridge.v1.BridgeService/GetMainCoins", runtime.WithHTTPPathPattern("/main-coins/{networkId}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -687,7 +669,7 @@ func RegisterBridgeServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/bridge.v1.BridgeService/GetPendingTransactions", runtime.WithHTTPPathPattern("/pending/{dest_addr}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/bridge.v1.BridgeService/GetPendingTransactions", runtime.WithHTTPPathPattern("/pending/{destAddr}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -905,7 +887,7 @@ func RegisterBridgeServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/bridge.v1.BridgeService/GetMainCoins", runtime.WithHTTPPathPattern("/main-coins/{network_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/bridge.v1.BridgeService/GetMainCoins", runtime.WithHTTPPathPattern("/main-coins/{networkId}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -927,7 +909,7 @@ func RegisterBridgeServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/bridge.v1.BridgeService/GetPendingTransactions", runtime.WithHTTPPathPattern("/pending/{dest_addr}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/bridge.v1.BridgeService/GetPendingTransactions", runtime.WithHTTPPathPattern("/pending/{destAddr}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -961,9 +943,9 @@ var (
 
 	pattern_BridgeService_GetCoinPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"coin-price"}, ""))
 
-	pattern_BridgeService_GetMainCoins_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"main-coins", "network_id"}, ""))
+	pattern_BridgeService_GetMainCoins_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"main-coins", "networkId"}, ""))
 
-	pattern_BridgeService_GetPendingTransactions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"pending", "dest_addr"}, ""))
+	pattern_BridgeService_GetPendingTransactions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"pending", "destAddr"}, ""))
 )
 
 var (

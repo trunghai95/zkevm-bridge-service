@@ -362,14 +362,7 @@ func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRe
 // GetMainCoins returns the info of the main coins in a network
 // Bridge rest API endpoint
 func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.GetMainCoinsResponse, error) {
-	limit := req.Limit
-	if limit == 0 {
-		limit = s.defaultPageLimit
-	}
-	if limit > s.maxPageLimit {
-		limit = s.maxPageLimit
-	}
-	coins, err := s.mainCoinsCache.GetMainCoinsByNetwork(ctx, req.NetworkId, uint(limit), uint(req.Offset))
+	coins, err := s.mainCoinsCache.GetMainCoinsByNetwork(ctx, req.NetworkId)
 	if err != nil {
 		return nil, err
 	}
