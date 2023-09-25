@@ -103,11 +103,13 @@ func start(ctx *cli.Context) error {
 	}
 
 	// Start the coin middleware kafka consumer
+	log.Debugf("start initializing kafka consumer...")
 	coinKafkaConsumer, err := coinmiddleware.NewKafkaConsumer(c.CoinKafkaConsumer, redisStorage)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
+	log.Debugf("finish initializing kafka consumer")
 	go coinKafkaConsumer.Start(ctx.Context)
 	defer func() {
 		err := coinKafkaConsumer.Close()
