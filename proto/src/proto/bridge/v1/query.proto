@@ -14,63 +14,63 @@ service BridgeService {
     /// Get api version
     rpc CheckAPI(CheckAPIRequest) returns (CheckAPIResponse) {
         option (google.api.http) = {
-            get: "/api"
+            get: "/priapi/v1/ob/bridge/api"
         };
     }
 
     /// Get bridges for the destination address both in L1 and L2
     rpc GetBridges(GetBridgesRequest) returns (GetBridgesResponse) {
         option (google.api.http) = {
-            get: "/bridges/{dest_addr}"
+            get: "/priapi/v1/ob/bridge/bridges/{dest_addr}"
         };
     }
 
     /// Get the merkle proof for the specific deposit
     rpc GetProof(GetProofRequest) returns (GetProofResponse) {
         option (google.api.http) = {
-            get: "/merkle-proof"
+            get: "/priapi/v1/ob/bridge/merkle-proof"
         };
     }
 
     /// Get the specific deposit
     rpc GetBridge(GetBridgeRequest) returns (GetBridgeResponse) {
         option (google.api.http) = {
-            get: "/bridge"
+            get: "/priapi/v1/ob/bridge/bridge"
         };
     }
 
     /// Get claims for the specific smart contract address both in L1 and L2
     rpc GetClaims(GetClaimsRequest) returns (GetClaimsResponse) {
         option (google.api.http) = {
-            get: "/claims/{dest_addr}"
+            get: "/priapi/v1/ob/bridge/claims/{dest_addr}"
         };
     }
 
     /// Get token wrapped for the specific smart contract address both in L1 and L2
     rpc GetTokenWrapped(GetTokenWrappedRequest) returns (GetTokenWrappedResponse) {
         option (google.api.http) = {
-            get: "/tokenwrapped"
+            get: "/priapi/v1/ob/bridge/tokenwrapped"
         };
     }
 
     /// Get the latest price of the specified coins
     rpc GetCoinPrice(GetCoinPriceRequest) returns (GetCoinPriceResponse) {
         option (google.api.http) = {
-            get: "/coin-price"
+            get: "/priapi/v1/ob/bridge/coin-price"
         };
     }
 
     /// Get the list of all the main coins of a specified network
     rpc GetMainCoins(GetMainCoinsRequest) returns (GetMainCoinsResponse) {
         option (google.api.http) = {
-            get: "/main-coins/{networkId}"
+            get: "/priapi/v1/ob/bridge/main-coins/{networkId}"
         };
     }
 
     /// Get the pending (not claimed) transactions of an account
     rpc GetPendingTransactions(GetPendingTransactionsRequest) returns (GetPendingTransactionsResponse) {
         option (google.api.http) = {
-            get: "/pending/{destAddr}"
+            get: "/priapi/v1/ob/bridge/pending/{destAddr}"
         };
     }
 }
