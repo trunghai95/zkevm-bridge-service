@@ -46,14 +46,14 @@ BridgeVersion = "v1"
     Port = "5432"
     MaxConns = 20
     [BridgeServer.Redis]
-    Addr = "localhost:6379"
+    Addr = "zkevm-bridge-redis:6379"
     Username = ""
     Password = ""
     DB = 0
 
 [CoinKafkaConsumer]
 Brokers = ["localhost:9092"]
-Topics = ["ConsumerGroupHandler"]
+Topics = ["explorer_chainAddressPrice_push"]
 ConsumerGroupID = "zkevm-bridge-service"
 InitialOffset = -1
 
