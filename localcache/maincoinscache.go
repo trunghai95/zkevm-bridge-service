@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	cacheRefreshInterval = 5 * time.Second
+	cacheRefreshInterval = 5 * time.Minute
 	queryLimit           = 100
 	maxRetries           = 5
 )
