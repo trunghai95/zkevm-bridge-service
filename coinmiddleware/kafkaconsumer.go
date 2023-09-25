@@ -42,9 +42,13 @@ func (c *kafkaConsumerImpl) Start(ctx context.Context) error {
 	defer cancel()
 
 	for {
+		log.Debugf("start consume")
 		err := c.client.Consume(ctx, c.topics, c.handler)
 		if err != nil {
 			log.Errorf("kafka consumer error: %v", err)
+			if errors.Is(err, sarama.ErrClosedConsumerGroup) {
+				err = nil
+			}
 			return errors.Wrap(err, "kafka consumer error")
 		}
 		if err = ctx.Err(); err != nil {

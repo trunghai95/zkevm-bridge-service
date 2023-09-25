@@ -52,7 +52,7 @@ BridgeVersion = "v1"
     DB = 0
 
 [CoinKafkaConsumer]
-Brokers = ["localhost:9092"]
+Brokers = ["zkevm-bridge-coin-kafka:9092"]
 Topics = ["explorer_chainAddressPrice_push"]
 ConsumerGroupID = "zkevm-bridge-service"
 InitialOffset = -1
