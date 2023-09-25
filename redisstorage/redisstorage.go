@@ -31,7 +31,7 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 	})
 	res, err := client.Ping(context.Background()).Result()
 	if err != nil {
-		return nil, errors.New("cannot connect to redis server")
+		return nil, errors.Wrap(err, "cannot connect to redis server")
 	}
 	log.Debugf("redis health check done, result: %v", res)
 	return &redisStorageImpl{client: client}, nil
