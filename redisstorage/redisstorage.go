@@ -29,6 +29,11 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 		Password: cfg.Password,
 		DB:       cfg.DB,
 	})
+	res, err := client.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, errors.New("cannot connect to redis server")
+	}
+	log.Debugf("redis health check done, result: %v", res)
 	return &redisStorageImpl{client: client}, nil
 }
 
