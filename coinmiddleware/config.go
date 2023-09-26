@@ -15,4 +15,8 @@ type Config struct {
 	// -1: Newest
 	// -2: Oldest
 	InitialOffset int64 `mapstructure:"InitialOffset"`
+
+	// Username and Password are used for SASL_SSL authentication
+	Username string `mapstructure:"Username"`
+	Password string `mapstructure:"Password"`
 }
