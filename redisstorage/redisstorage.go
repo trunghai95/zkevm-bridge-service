@@ -68,6 +68,9 @@ func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.Symbol
 
 func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.SymbolInfo) ([]*pb.SymbolPrice, error) {
 	log.Debugf("GetCoinPrice size[%v]", len(symbols))
+	if len(symbols) == 0 {
+		return nil, nil
+	}
 	if s == nil || s.client == nil {
 		return nil, errors.New("redis client is nil")
 	}
@@ -89,12 +92,17 @@ func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.Symbo
 	}
 
 	var priceList []*pb.SymbolPrice
-	for _, res := range redisResult {
+	for i, res := range redisResult {
+		if res == nil {
+			log.Infof("GetCoinPrice price not found chainId[%v] address[%v]", symbols[i].ChainId, symbols[i].Address)
+			priceList = append(priceList, &pb.SymbolPrice{ChainId: symbols[i].ChainId, Address: symbols[i].Address})
+			continue
+		}
 		price := &pb.SymbolPrice{}
 		err := protojson.Unmarshal(res.([]byte), price)
 		if err != nil {
 			log.Infof("cannot unmarshal price object[%v] error[%v]", res, err)
-			priceList = append(priceList, &pb.SymbolPrice{})
+			priceList = append(priceList, &pb.SymbolPrice{ChainId: symbols[i].ChainId, Address: symbols[i].Address})
 		} else {
 			priceList = append(priceList, price)
 		}
