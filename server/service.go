@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
+	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/pkg/errors"
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl"
@@ -351,6 +352,7 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 // GetCoinPrice returns the price for each coin symbol in the request
 // Bridge rest API endpoint
 func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
+	log.Debugf("GetCoinPrice chainID[%v] address[%v]", req.ChainId, req.Address)
 	// Due to GRPC gateway limitations, we cannot use a list of struct objects in the query params
 	// So instead we will accept 2 separate list of chainIds and addresses in the request, and convert it to SymbolInfo
 	// Need to make sure the number of chainIds and addresses are the same
