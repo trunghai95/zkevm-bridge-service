@@ -218,7 +218,8 @@ message GetClaimsRequest {
 }
 
 message GetCoinPriceRequest {
-    repeated SymbolInfo symbols = 1;
+    repeated uint64 chainId = 1;
+    repeated string address = 2;
 }
 
 message GetMainCoinsRequest {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
+	"github.com/pkg/errors"
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
@@ -350,7 +351,18 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 // GetCoinPrice returns the price for each coin symbol in the request
 // Bridge rest API endpoint
 func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
-	priceList, err := s.redisStorage.GetCoinPrice(ctx, req.Symbols)
+	// Due to GRPC gateway limitations, we cannot use a list of struct objects in the query params
+	// So instead we will accept 2 separate list of chainIds and addresses in the request, and convert it to SymbolInfo
+	// Need to make sure the number of chainIds and addresses are the same
+	if len(req.ChainId) != len(req.Address) {
+		return nil, errors.New("chainId list and address list must have the same length")
+	}
+	symbols := make([]*pb.SymbolInfo, len(req.ChainId))
+	for i := range req.ChainId {
+		symbols[i] = &pb.SymbolInfo{ChainId: req.ChainId[i], Address: req.Address[i]}
+	}
+
+	priceList, err := s.redisStorage.GetCoinPrice(ctx, symbols)
 	if err != nil {
 		return nil, err
 	}
