@@ -99,7 +99,7 @@ func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.Symbo
 			continue
 		}
 		price := &pb.SymbolPrice{}
-		err := protojson.Unmarshal(res.([]byte), price)
+		err := protojson.Unmarshal([]byte(res.(string)), price)
 		if err != nil {
 			log.Infof("cannot unmarshal price object[%v] error[%v]", res, err)
 			priceList = append(priceList, &pb.SymbolPrice{ChainId: symbols[i].ChainId, Address: symbols[i].Address})
