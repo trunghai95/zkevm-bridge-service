@@ -593,7 +593,7 @@ func (p *PostgresStorage) UpdateDepositsStatusForTesting(ctx context.Context, db
 // GetAllMainCoins returns all the coin info from the main_coins table
 func (p *PostgresStorage) GetAllMainCoins(ctx context.Context, limit uint, offset uint, dbTx pgx.Tx) ([]*pb.CoinInfo, error) {
 	// TODO: Implement
-	const getCoinsSQL = `SELECT symbol, name, decimals, address, chain_id, network_id, logo_link
+	const getCoinsSQL = `SELECT symbol, name, decimals, encode(address, 'hex'), chain_id, network_id, logo_link
 		FROM common.main_coins WHERE is_deleted = false ORDER BY id LIMIT $1 OFFSET $2`
 	rows, err := p.getExecQuerier(dbTx).Query(ctx, getCoinsSQL, limit, offset)
 	if err != nil {
