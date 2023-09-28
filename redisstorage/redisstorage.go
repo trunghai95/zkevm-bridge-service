@@ -38,7 +38,6 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 }
 
 func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.SymbolPrice) error {
-	// TODO: Check the current price timestamp to make sure it's not overwritten by older records?
 	log.Debugf("SetCoinPrice size[%v]", len(prices))
 	if s == nil || s.client == nil {
 		return errors.New("redis client is nil")
