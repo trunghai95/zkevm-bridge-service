@@ -41,6 +41,8 @@ type BridgeServiceClient interface {
 	GetMainCoins(ctx context.Context, in *GetMainCoinsRequest, opts ...grpc.CallOption) (*GetMainCoinsResponse, error)
 	// / Get the pending (not claimed) transactions of an account
 	GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*GetPendingTransactionsResponse, error)
+	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
+	GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*GetAllTransactionsResponse, error)
 }
 
 type bridgeServiceClient struct {
@@ -132,6 +134,15 @@ func (c *bridgeServiceClient) GetPendingTransactions(ctx context.Context, in *Ge
 	return out, nil
 }
 
+func (c *bridgeServiceClient) GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*GetAllTransactionsResponse, error) {
+	out := new(GetAllTransactionsResponse)
+	err := c.cc.Invoke(ctx, "/bridge.v1.BridgeService/GetAllTransactions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BridgeServiceServer is the server API for BridgeService service.
 // All implementations must embed UnimplementedBridgeServiceServer
 // for forward compatibility
@@ -155,6 +166,8 @@ type BridgeServiceServer interface {
 	GetMainCoins(context.Context, *GetMainCoinsRequest) (*GetMainCoinsResponse, error)
 	// / Get the pending (not claimed) transactions of an account
 	GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*GetPendingTransactionsResponse, error)
+	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
+	GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*GetAllTransactionsResponse, error)
 	mustEmbedUnimplementedBridgeServiceServer()
 }
 
@@ -188,6 +201,9 @@ func (UnimplementedBridgeServiceServer) GetMainCoins(context.Context, *GetMainCo
 }
 func (UnimplementedBridgeServiceServer) GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*GetPendingTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPendingTransactions not implemented")
+}
+func (UnimplementedBridgeServiceServer) GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*GetAllTransactionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllTransactions not implemented")
 }
 func (UnimplementedBridgeServiceServer) mustEmbedUnimplementedBridgeServiceServer() {}
 
@@ -364,6 +380,24 @@ func _BridgeService_GetPendingTransactions_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BridgeService_GetAllTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BridgeServiceServer).GetAllTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/bridge.v1.BridgeService/GetAllTransactions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BridgeServiceServer).GetAllTransactions(ctx, req.(*GetAllTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BridgeService_ServiceDesc is the grpc.ServiceDesc for BridgeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -406,6 +440,10 @@ var BridgeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPendingTransactions",
 			Handler:    _BridgeService_GetPendingTransactions_Handler,
+		},
+		{
+			MethodName: "GetAllTransactions",
+			Handler:    _BridgeService_GetAllTransactions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

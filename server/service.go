@@ -18,6 +18,10 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+const (
+	defaultTxEstimateTime = 15
+)
+
 type bridgeService struct {
 	storage          BridgeServiceStorage
 	redisStorage     redisstorage.RedisStorage
@@ -386,6 +390,7 @@ func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRe
 }
 
 // GetPendingTransactions returns the pending transactions of an account
+// Bridge rest API endpoint
 func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.GetPendingTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
@@ -402,12 +407,13 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 	var pbTransactions []*pb.Transaction
 	for _, deposit := range deposits {
 		transaction := &pb.Transaction{
-			FromChain:   uint32(deposit.NetworkID),
-			ToChain:     uint32(deposit.DestinationNetwork),
-			BridgeToken: deposit.OriginalAddress.Hex(),
-			TokenAmount: deposit.Amount.String(),
-			Time:        uint64(deposit.ReceivedAt.Unix()),
-			TxHash:      deposit.TxHash.String(),
+			FromChain:    uint32(deposit.NetworkID),
+			ToChain:      uint32(deposit.DestinationNetwork),
+			BridgeToken:  deposit.OriginalAddress.Hex(),
+			TokenAmount:  deposit.Amount.String(),
+			EstimateTime: defaultTxEstimateTime,
+			Time:         uint64(deposit.Time.Unix()),
+			TxHash:       deposit.TxHash.String(),
 		}
 		transaction.Status = 0
 		if deposit.ReadyForClaim {
@@ -416,6 +422,56 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 		pbTransactions = append(pbTransactions, transaction)
 	}
 	return &pb.GetPendingTransactionsResponse{
+		Transactions: pbTransactions,
+	}, nil
+}
+
+// GetAllTransactions returns all the transactions of an account, similar to GetBridges
+// Bridge rest API endpoint
+func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.GetAllTransactionsResponse, error) {
+	limit := req.Limit
+	if limit == 0 {
+		limit = s.defaultPageLimit
+	}
+	if limit > s.maxPageLimit {
+		limit = s.maxPageLimit
+	}
+
+	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbTransactions []*pb.Transaction
+	for _, deposit := range deposits {
+		transaction := &pb.Transaction{
+			FromChain:    uint32(deposit.NetworkID),
+			ToChain:      uint32(deposit.DestinationNetwork),
+			BridgeToken:  deposit.OriginalAddress.Hex(),
+			TokenAmount:  deposit.Amount.String(),
+			EstimateTime: defaultTxEstimateTime,
+			Time:         uint64(deposit.Time.Unix()),
+			TxHash:       deposit.TxHash.String(),
+		}
+		transaction.Status = 0 // Not ready for claim
+		if deposit.ReadyForClaim {
+			// Check whether it has been claimed or not
+			claim, err := s.storage.GetClaim(ctx, deposit.DepositCount, deposit.DestinationNetwork, nil)
+			transaction.Status = 1 // Ready but not claimed
+			if err != nil {
+				if !errors.Is(err, gerror.ErrStorageNotFound) {
+					return nil, err
+				}
+			} else {
+				transaction.Status = 2 // Claimed
+				transaction.ClaimTxHash = claim.TxHash.String()
+				transaction.ClaimTime = uint64(claim.Time.Unix())
+			}
+		}
+		pbTransactions = append(pbTransactions, transaction)
+	}
+
+	return &pb.GetAllTransactionsResponse{
 		Transactions: pbTransactions,
 	}, nil
 }

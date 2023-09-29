@@ -95,7 +95,7 @@ func runGRPCServer(ctx context.Context, bridgeServer pb.BridgeServiceServer, por
 }
 
 func preflightHandler(w http.ResponseWriter, r *http.Request) {
-	headers := []string{"Content-Type", "Accept"}
+	headers := []string{"Content-Type", "Accept", "X-Locale", "X-Utc", "X-Zkdex-Env"}
 	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
 	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
 	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))

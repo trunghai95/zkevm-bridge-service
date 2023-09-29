@@ -460,7 +460,7 @@ func (p *PostgresStorage) GetPendingTransactions(ctx context.Context, destAddr s
 			deposit etherman.Deposit
 			amount  string
 		)
-		err = rows.Scan(&deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress, &deposit.DepositCount, &deposit.BlockID, &deposit.BlockNumber, &deposit.NetworkID, &deposit.TxHash, &deposit.Metadata, &deposit.ReadyForClaim, &deposit.ReceivedAt)
+		err = rows.Scan(&deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress, &deposit.DepositCount, &deposit.BlockID, &deposit.BlockNumber, &deposit.NetworkID, &deposit.TxHash, &deposit.Metadata, &deposit.ReadyForClaim, &deposit.Time)
 		if err != nil {
 			return nil, err
 		}
@@ -607,6 +607,9 @@ func (p *PostgresStorage) GetAllMainCoins(ctx context.Context, limit uint, offse
 		if err != nil {
 			log.Errorf("GetAllMainCoins scan row error[%v]", err)
 			return nil, err
+		}
+		if coin.Address != "" {
+			coin.Address = "0x" + coin.Address
 		}
 		result = append(result, coin)
 	}
