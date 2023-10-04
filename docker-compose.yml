@@ -154,3 +154,13 @@ services:
       - "/bin/sh"
       - "-c"
       - "/app/zkevm-bridge run --cfg /app/config.toml"
+
+  zkevm-bridge-kafka-consumer:
+    container_name: zkevm-bridge-kafka-consumer
+    image: zkevm-bridge-service
+    volumes:
+      - ./config/config.local.toml:/app/config.toml
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/zkevm-bridge runKafkaConsumer --cfg /app/config.toml"
