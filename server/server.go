@@ -12,6 +12,7 @@ import (
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	sentinelPlugin "github.com/alibaba/sentinel-golang/pkg/adapters/grpc"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -75,7 +76,7 @@ func runGRPCServer(ctx context.Context, bridgeServer pb.BridgeServiceServer, por
 		return err
 	}
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.UnaryInterceptor(sentinelPlugin.NewUnaryServerInterceptor()))
 	pb.RegisterBridgeServiceServer(server, bridgeServer)
 
 	healthService := newHealthChecker()
