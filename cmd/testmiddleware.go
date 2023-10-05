@@ -10,8 +10,10 @@ import (
 	"github.com/alibaba/sentinel-golang/pkg/datasource/apollo"
 	"github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/urfave/cli/v2"
+	"math/rand"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func testMiddleware(ctx *cli.Context) error {
@@ -74,10 +76,13 @@ func testMiddleware(ctx *cli.Context) error {
 				e, b := sentinel.Entry("testresource")
 				if b == nil {
 					log.Infof("goroutine #%v req #%v printed", i, cnt)
+					time.Sleep(time.Duration(rand.Uint64()%100) * time.Millisecond)
 					e.Exit()
 				} else {
+					time.Sleep(time.Duration(rand.Uint64()%100) * time.Millisecond)
 					//log.Errorf("goroutine #%v blocked, err[%v]", i, b.Error())
 				}
+				cnt++
 			}
 		}(i)
 	}
