@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	sentinel "github.com/alibaba/sentinel-golang/api"
+	"github.com/alibaba/sentinel-golang/core/flow"
 	"github.com/alibaba/sentinel-golang/ext/datasource"
 	"github.com/alibaba/sentinel-golang/pkg/datasource/apollo"
 	"github.com/apolloconfig/agollo/v4/env/config"
@@ -23,11 +26,21 @@ func testMiddleware(ctx *cli.Context) error {
 	}
 	propertyHandler := datasource.NewDefaultPropertyHandler(
 		func(src []byte) (interface{}, error) {
-			return string(src), nil
+			ruleList := make([]*flow.Rule, 0)
+			err := json.Unmarshal(src, &ruleList)
+			if err != nil {
+				logger.Errorf("unmarshal rule list err[%v]", err)
+				return nil, err
+			}
+			return ruleList, nil
 		},
 		func(data interface{}) error {
-			s := data.(string)
-			logger.Infof("update new config: %v", s)
+			ruleList := data.([]*flow.Rule)
+			logger.Infof("updating flow rules: %v", ruleList)
+			_, err := flow.LoadRules(ruleList)
+			if err != nil {
+				logger.Errorf("load rules err[%v]", err)
+			}
 			return nil
 		})
 
@@ -41,7 +54,7 @@ func testMiddleware(ctx *cli.Context) error {
 	}
 
 	logger.Debug("start initializing config")
-	source, err := apollo.NewDatasource(cfg, "testkey1", apollo.WithPropertyHandlers(propertyHandler), apollo.WithLogger(logger))
+	source, err := apollo.NewDatasource(cfg, "flow_rules", apollo.WithPropertyHandlers(propertyHandler), apollo.WithLogger(logger))
 	if err != nil {
 		logger.Errorf("NewDataSource err[%v]", err)
 		return err
@@ -52,6 +65,21 @@ func testMiddleware(ctx *cli.Context) error {
 		return err
 	}
 	logger.Debug("finish initializing config")
+
+	// Test using the rule
+	for i := 0; i < 10; i++ {
+		go func(i int) {
+			for {
+				e, b := sentinel.Entry("testresource")
+				if b == nil {
+					log.Infof("goroutine #%v print", i)
+					e.Exit()
+				} else {
+					log.Errorf("goroutine #%v blocked, err[%v]", b.Error())
+				}
+			}
+		}(i)
+	}
 
 	// Wait for an in interrupt.
 	ch := make(chan os.Signal, 1)
