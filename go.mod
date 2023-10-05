@@ -33,9 +33,11 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VictoriaMetrics/fastcache v1.6.0 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
-	github.com/alibaba/sentinel-golang v1.0.2 // indirect
+	github.com/alibaba/sentinel-golang v1.0.3 // indirect
 	github.com/alibaba/sentinel-golang/pkg/adapters/grpc v0.0.0-20230626085943-08071855bc67 // indirect
+	github.com/alibaba/sentinel-golang/pkg/datasource/apollo v0.0.0-20230626085943-08071855bc67 // indirect
 	github.com/allegro/bigcache v1.2.1 // indirect
+	github.com/apolloconfig/agollo/v4 v4.0.9 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cespare/cp v1.1.1 // indirect
@@ -125,6 +127,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
+	github.com/shirou/gopsutil/v3 v3.21.6 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/skeema/knownhosts v1.1.1 // indirect
 	github.com/spf13/afero v1.9.5 // indirect

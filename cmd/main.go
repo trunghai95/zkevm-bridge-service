@@ -58,6 +58,12 @@ func main() {
 			Action:  startKafkaConsumer,
 			Flags:   flags,
 		},
+		{
+			Name:    "runtest",
+			Aliases: []string{},
+			Usage:   "Run middleware test",
+			Action:  testMiddleware,
+		},
 	}
 
 	err := app.Run(os.Args)
