@@ -27,7 +27,7 @@ func testMiddleware(ctx *cli.Context) error {
 		},
 		func(data interface{}) error {
 			s := data.(string)
-			logger.Errorf("update new config: %v", s)
+			logger.Infof("update new config: %v", s)
 			return nil
 		})
 
