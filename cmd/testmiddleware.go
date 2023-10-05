@@ -69,13 +69,14 @@ func testMiddleware(ctx *cli.Context) error {
 	// Test using the rule
 	for i := 0; i < 10; i++ {
 		go func(i int) {
+			cnt := 0
 			for {
 				e, b := sentinel.Entry("testresource")
 				if b == nil {
-					log.Infof("goroutine #%v print", i)
+					log.Infof("goroutine #%v req #%v printed", i, cnt)
 					e.Exit()
 				} else {
-					log.Errorf("goroutine #%v blocked, err[%v]", b.Error())
+					//log.Errorf("goroutine #%v blocked, err[%v]", i, b.Error())
 				}
 			}
 		}(i)
