@@ -196,6 +196,8 @@ message Transaction {
     string txHash = 8; // Deposit tx hash
     string claimTxHash = 9;
     uint64 claimTime = 10; // Claim's block time
+    uint32 fromChainId = 11;
+    uint32 toChainId = 12;
 }
 
 // Get requests

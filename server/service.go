@@ -27,6 +27,7 @@ type bridgeService struct {
 	redisStorage     redisstorage.RedisStorage
 	mainCoinsCache   localcache.MainCoinsCache
 	networkIDs       map[uint]uint8
+	chainIDs         map[uint]uint8
 	height           uint8
 	defaultPageLimit uint32
 	maxPageLimit     uint32
@@ -36,10 +37,12 @@ type bridgeService struct {
 }
 
 // NewBridgeService creates new bridge service.
-func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
+func NewBridgeService(cfg Config, height uint8, networks []uint, chainIds []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
 	var networkIDs = make(map[uint]uint8)
+	var chainIDs = make(map[uint]uint8)
 	for i, network := range networks {
 		networkIDs[network] = uint8(i)
+		chainIDs[network] = uint8(chainIds[i])
 	}
 	cache, err := lru.New[string, [][]byte](cfg.CacheSize)
 	if err != nil {
@@ -51,6 +54,7 @@ func NewBridgeService(cfg Config, height uint8, networks []uint, storage interfa
 		mainCoinsCache:   mainCoinsCache,
 		height:           height,
 		networkIDs:       networkIDs,
+		chainIDs:         chainIDs,
 		defaultPageLimit: cfg.DefaultPageLimit,
 		maxPageLimit:     cfg.MaxPageLimit,
 		version:          cfg.BridgeVersion,
@@ -414,6 +418,8 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 			EstimateTime: defaultTxEstimateTime,
 			Time:         uint64(deposit.Time.Unix()),
 			TxHash:       deposit.TxHash.String(),
+			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
+			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 		}
 		transaction.Status = 0
 		if deposit.ReadyForClaim {
@@ -452,6 +458,8 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			EstimateTime: defaultTxEstimateTime,
 			Time:         uint64(deposit.Time.Unix()),
 			TxHash:       deposit.TxHash.String(),
+			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
+			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 		}
 		transaction.Status = 0 // Not ready for claim
 		if deposit.ReadyForClaim {

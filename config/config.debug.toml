@@ -22,6 +22,8 @@ FreeGas = true
 [Etherman]
 L1URL = "http://localhost:8545"
 L2URLs = ["http://localhost:8123"]
+L1ChainId = 5
+L2ChainIds = [195]
 
 [Synchronizer]
 SyncInterval = "1s"

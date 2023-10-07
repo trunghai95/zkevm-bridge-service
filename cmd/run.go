@@ -32,6 +32,10 @@ func startServer(ctx *cli.Context) error {
 		return err
 	}
 
+	l1ChainId := c.Etherman.L1ChainId
+	l2ChainIds := c.Etherman.L2ChainIds
+	var chainIDs = []uint{l1ChainId}
+	chainIDs = append(chainIDs, l2ChainIds...)
 	l1Etherman, l2Ethermans, err := newEthermans(c)
 	if err != nil {
 		log.Error(err)
@@ -92,7 +96,7 @@ func startServer(ctx *cli.Context) error {
 		log.Error(err)
 		return err
 	}
-	bridgeService := server.NewBridgeService(c.BridgeServer, c.BridgeController.Height, networkIDs, apiStorage, redisStorage, mainCoinsCache)
+	bridgeService := server.NewBridgeService(c.BridgeServer, c.BridgeController.Height, networkIDs, chainIDs, apiStorage, redisStorage, mainCoinsCache)
 	err = server.RunServer(c.BridgeServer, bridgeService)
 	if err != nil {
 		log.Error(err)
