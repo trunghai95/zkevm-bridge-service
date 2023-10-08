@@ -302,7 +302,7 @@ message CommonTransactionsResponse {
     string error_code = 3;
     string error_message = 4;
     string detailMsg = 5;
-    repeated Transaction data = 6;
+    TransactionDetail data = 6;
 }
 
 message CommonCoinsResponse {
@@ -321,4 +321,9 @@ message CommonCoinPricesResponse {
     string error_message = 4;
     string detailMsg = 5;
     repeated SymbolPrice data = 6;
+}
+
+message TransactionDetail {
+    bool hasNext = 1;
+    repeated Transaction transactions = 2;
 }

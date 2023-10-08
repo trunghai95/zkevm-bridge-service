@@ -411,12 +411,27 @@ func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRe
 // Bridge rest API endpoint
 func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
+	offset := req.Offset
 	if limit == 0 {
 		limit = s.defaultPageLimit
 	}
 	if limit > s.maxPageLimit {
 		limit = s.maxPageLimit
 	}
+
+	totalCount, err := s.storage.GetPendingTransactionsCount(ctx, req.DestAddr, nil)
+	if err != nil {
+		return &pb.CommonTransactionsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
+	}
+
+	hasNext := false
+	if totalCount > offset+uint64(limit) {
+		hasNext = true
+	}
+
 	deposits, err := s.storage.GetPendingTransactions(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
 	if err != nil {
 		return &pb.CommonTransactionsResponse{
@@ -446,7 +461,7 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 	}
 	return &pb.CommonTransactionsResponse{
 		Code: defaultSuccessCode,
-		Data: pbTransactions,
+		Data: &pb.TransactionDetail{HasNext: hasNext, Transactions: pbTransactions},
 	}, nil
 }
 
@@ -454,11 +469,25 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 // Bridge rest API endpoint
 func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
+	offset := req.Offset
 	if limit == 0 {
 		limit = s.defaultPageLimit
 	}
 	if limit > s.maxPageLimit {
 		limit = s.maxPageLimit
+	}
+
+	totalCount, err := s.storage.GetDepositCount(ctx, req.DestAddr, nil)
+	if err != nil {
+		return &pb.CommonTransactionsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
+	}
+
+	hasNext := false
+	if totalCount > offset+uint64(limit) {
+		hasNext = true
 	}
 
 	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
@@ -505,6 +534,6 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 
 	return &pb.CommonTransactionsResponse{
 		Code: defaultSuccessCode,
-		Data: pbTransactions,
+		Data: &pb.TransactionDetail{HasNext: hasNext, Transactions: pbTransactions},
 	}, nil
 }

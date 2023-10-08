@@ -471,6 +471,17 @@ func (p *PostgresStorage) GetPendingTransactions(ctx context.Context, destAddr s
 	return deposits, nil
 }
 
+func (p *PostgresStorage) GetPendingTransactionsCount(ctx context.Context, destAddr string, dbTx pgx.Tx) (uint64, error) {
+	const getPendingTransactionsCountSQL = `SELECT COUNT(*) FROM sync.deposit as d INNER JOIN sync.block as b ON d.network_id = b.network_id AND d.block_id = b.id
+		WHERE dest_addr = $1 AND NOT EXISTS (SELECT 1 FROM sync.claim as c WHERE c.index = d.deposit_cnt AND c.network_id = d.dest_net)`
+	var pendingTransactionsCount uint64
+	err := p.getExecQuerier(dbTx).QueryRow(ctx, getPendingTransactionsCountSQL, common.FromHex(destAddr)).Scan(&pendingTransactionsCount)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return 0, gerror.ErrStorageNotFound
+	}
+	return pendingTransactionsCount, err
+}
+
 // GetDepositCount gets the deposit count for the destination address.
 func (p *PostgresStorage) GetDepositCount(ctx context.Context, destAddr string, dbTx pgx.Tx) (uint64, error) {
 	const getDepositCountSQL = "SELECT COUNT(*) FROM sync.deposit WHERE dest_addr = $1"
