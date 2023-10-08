@@ -52,13 +52,13 @@ type BridgeServiceClient interface {
 	// / Get token wrapped for the specific smart contract address both in L1 and L2
 	GetTokenWrapped(ctx context.Context, in *GetTokenWrappedRequest, opts ...grpc.CallOption) (*GetTokenWrappedResponse, error)
 	// / Get the latest price of the specified coins
-	GetCoinPrice(ctx context.Context, in *GetCoinPriceRequest, opts ...grpc.CallOption) (*GetCoinPriceResponse, error)
+	GetCoinPrice(ctx context.Context, in *GetCoinPriceRequest, opts ...grpc.CallOption) (*CommonCoinPricesResponse, error)
 	// / Get the list of all the main coins of a specified network
-	GetMainCoins(ctx context.Context, in *GetMainCoinsRequest, opts ...grpc.CallOption) (*GetMainCoinsResponse, error)
+	GetMainCoins(ctx context.Context, in *GetMainCoinsRequest, opts ...grpc.CallOption) (*CommonCoinsResponse, error)
 	// / Get the pending (not claimed) transactions of an account
-	GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*GetPendingTransactionsResponse, error)
+	GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error)
 	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
-	GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*CommonGetAllTransactionsResponse, error)
+	GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error)
 }
 
 type bridgeServiceClient struct {
@@ -123,8 +123,8 @@ func (c *bridgeServiceClient) GetTokenWrapped(ctx context.Context, in *GetTokenW
 	return out, nil
 }
 
-func (c *bridgeServiceClient) GetCoinPrice(ctx context.Context, in *GetCoinPriceRequest, opts ...grpc.CallOption) (*GetCoinPriceResponse, error) {
-	out := new(GetCoinPriceResponse)
+func (c *bridgeServiceClient) GetCoinPrice(ctx context.Context, in *GetCoinPriceRequest, opts ...grpc.CallOption) (*CommonCoinPricesResponse, error) {
+	out := new(CommonCoinPricesResponse)
 	err := c.cc.Invoke(ctx, BridgeService_GetCoinPrice_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -132,8 +132,8 @@ func (c *bridgeServiceClient) GetCoinPrice(ctx context.Context, in *GetCoinPrice
 	return out, nil
 }
 
-func (c *bridgeServiceClient) GetMainCoins(ctx context.Context, in *GetMainCoinsRequest, opts ...grpc.CallOption) (*GetMainCoinsResponse, error) {
-	out := new(GetMainCoinsResponse)
+func (c *bridgeServiceClient) GetMainCoins(ctx context.Context, in *GetMainCoinsRequest, opts ...grpc.CallOption) (*CommonCoinsResponse, error) {
+	out := new(CommonCoinsResponse)
 	err := c.cc.Invoke(ctx, BridgeService_GetMainCoins_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -141,8 +141,8 @@ func (c *bridgeServiceClient) GetMainCoins(ctx context.Context, in *GetMainCoins
 	return out, nil
 }
 
-func (c *bridgeServiceClient) GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*GetPendingTransactionsResponse, error) {
-	out := new(GetPendingTransactionsResponse)
+func (c *bridgeServiceClient) GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error) {
+	out := new(CommonTransactionsResponse)
 	err := c.cc.Invoke(ctx, BridgeService_GetPendingTransactions_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -150,8 +150,8 @@ func (c *bridgeServiceClient) GetPendingTransactions(ctx context.Context, in *Ge
 	return out, nil
 }
 
-func (c *bridgeServiceClient) GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*CommonGetAllTransactionsResponse, error) {
-	out := new(CommonGetAllTransactionsResponse)
+func (c *bridgeServiceClient) GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error) {
+	out := new(CommonTransactionsResponse)
 	err := c.cc.Invoke(ctx, BridgeService_GetAllTransactions_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -177,13 +177,13 @@ type BridgeServiceServer interface {
 	// / Get token wrapped for the specific smart contract address both in L1 and L2
 	GetTokenWrapped(context.Context, *GetTokenWrappedRequest) (*GetTokenWrappedResponse, error)
 	// / Get the latest price of the specified coins
-	GetCoinPrice(context.Context, *GetCoinPriceRequest) (*GetCoinPriceResponse, error)
+	GetCoinPrice(context.Context, *GetCoinPriceRequest) (*CommonCoinPricesResponse, error)
 	// / Get the list of all the main coins of a specified network
-	GetMainCoins(context.Context, *GetMainCoinsRequest) (*GetMainCoinsResponse, error)
+	GetMainCoins(context.Context, *GetMainCoinsRequest) (*CommonCoinsResponse, error)
 	// / Get the pending (not claimed) transactions of an account
-	GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*GetPendingTransactionsResponse, error)
+	GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*CommonTransactionsResponse, error)
 	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
-	GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonGetAllTransactionsResponse, error)
+	GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonTransactionsResponse, error)
 }
 
 // UnimplementedBridgeServiceServer should be embedded to have forward compatible implementations.
@@ -208,16 +208,16 @@ func (UnimplementedBridgeServiceServer) GetClaims(context.Context, *GetClaimsReq
 func (UnimplementedBridgeServiceServer) GetTokenWrapped(context.Context, *GetTokenWrappedRequest) (*GetTokenWrappedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenWrapped not implemented")
 }
-func (UnimplementedBridgeServiceServer) GetCoinPrice(context.Context, *GetCoinPriceRequest) (*GetCoinPriceResponse, error) {
+func (UnimplementedBridgeServiceServer) GetCoinPrice(context.Context, *GetCoinPriceRequest) (*CommonCoinPricesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCoinPrice not implemented")
 }
-func (UnimplementedBridgeServiceServer) GetMainCoins(context.Context, *GetMainCoinsRequest) (*GetMainCoinsResponse, error) {
+func (UnimplementedBridgeServiceServer) GetMainCoins(context.Context, *GetMainCoinsRequest) (*CommonCoinsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMainCoins not implemented")
 }
-func (UnimplementedBridgeServiceServer) GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*GetPendingTransactionsResponse, error) {
+func (UnimplementedBridgeServiceServer) GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*CommonTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPendingTransactions not implemented")
 }
-func (UnimplementedBridgeServiceServer) GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonGetAllTransactionsResponse, error) {
+func (UnimplementedBridgeServiceServer) GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllTransactions not implemented")
 }
 

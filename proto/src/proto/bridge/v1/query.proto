@@ -72,7 +72,7 @@ service BridgeService {
     }
 
     /// Get the latest price of the specified coins
-    rpc GetCoinPrice(GetCoinPriceRequest) returns (GetCoinPriceResponse) {
+    rpc GetCoinPrice(GetCoinPriceRequest) returns (CommonCoinPricesResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/coin-price",
             additional_bindings: {
@@ -82,7 +82,7 @@ service BridgeService {
     }
 
     /// Get the list of all the main coins of a specified network
-    rpc GetMainCoins(GetMainCoinsRequest) returns (GetMainCoinsResponse) {
+    rpc GetMainCoins(GetMainCoinsRequest) returns (CommonCoinsResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/main-coins/{networkId}",
             additional_bindings: {
@@ -92,7 +92,7 @@ service BridgeService {
     }
 
     /// Get the pending (not claimed) transactions of an account
-    rpc GetPendingTransactions(GetPendingTransactionsRequest) returns (GetPendingTransactionsResponse) {
+    rpc GetPendingTransactions(GetPendingTransactionsRequest) returns (CommonTransactionsResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/pending/{destAddr}",
             additional_bindings: {
@@ -102,7 +102,7 @@ service BridgeService {
     }
 
     /// Get all the transactions of an account. Similar to GetBridges but the field names are changed
-    rpc GetAllTransactions(GetAllTransactionsRequest) returns (CommonGetAllTransactionsResponse) {
+    rpc GetAllTransactions(GetAllTransactionsRequest) returns (CommonTransactionsResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/all/{destAddr}",
             additional_bindings: {
@@ -296,11 +296,29 @@ message GetAllTransactionsResponse {
     repeated Transaction transactions = 1;
 }
 
-message CommonGetAllTransactionsResponse {
+message CommonTransactionsResponse {
     uint32 code = 1;
     string msg = 2;
     string error_code = 3;
     string error_message = 4;
     string detailMsg = 5;
     repeated Transaction data = 6;
+}
+
+message CommonCoinsResponse {
+    uint32 code = 1;
+    string msg = 2;
+    string error_code = 3;
+    string error_message = 4;
+    string detailMsg = 5;
+    repeated CoinInfo data = 6;
+}
+
+message CommonCoinPricesResponse {
+    uint32 code = 1;
+    string msg = 2;
+    string error_code = 3;
+    string error_message = 4;
+    string detailMsg = 5;
+    repeated SymbolPrice data = 6;
 }

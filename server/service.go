@@ -361,13 +361,17 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 
 // GetCoinPrice returns the price for each coin symbol in the request
 // Bridge rest API endpoint
-func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
+func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.CommonCoinPricesResponse, error) {
 	log.Debugf("GetCoinPrice chainID[%v] address[%v]", req.ChainId, req.Address)
 	// Due to GRPC gateway limitations, we cannot use a list of struct objects in the query params
 	// So instead we will accept 2 separate list of chainIds and addresses in the request, and convert it to SymbolInfo
 	// Need to make sure the number of chainIds and addresses are the same
 	if len(req.ChainId) != len(req.Address) {
-		return nil, errors.New("chainId list and address list must have the same length")
+		return &pb.CommonCoinPricesResponse{
+			Code: defaultErrorCode,
+			Msg:  "chainId list and address list must have the same length",
+			Data: nil,
+		}, nil
 	}
 	symbols := make([]*pb.SymbolInfo, len(req.ChainId))
 	for i := range req.ChainId {
@@ -376,28 +380,36 @@ func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRe
 
 	priceList, err := s.redisStorage.GetCoinPrice(ctx, symbols)
 	if err != nil {
-		return nil, err
+		return &pb.CommonCoinPricesResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
 	}
-	return &pb.GetCoinPriceResponse{
-		Prices: priceList,
+	return &pb.CommonCoinPricesResponse{
+		Code: defaultSuccessCode,
+		Data: priceList,
 	}, nil
 }
 
 // GetMainCoins returns the info of the main coins in a network
 // Bridge rest API endpoint
-func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.GetMainCoinsResponse, error) {
+func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.CommonCoinsResponse, error) {
 	coins, err := s.mainCoinsCache.GetMainCoinsByNetwork(ctx, req.NetworkId)
 	if err != nil {
-		return nil, err
+		return &pb.CommonCoinsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
 	}
-	return &pb.GetMainCoinsResponse{
-		CoinInfos: coins,
+	return &pb.CommonCoinsResponse{
+		Code: defaultSuccessCode,
+		Data: coins,
 	}, nil
 }
 
 // GetPendingTransactions returns the pending transactions of an account
 // Bridge rest API endpoint
-func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.GetPendingTransactionsResponse, error) {
+func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
 		limit = s.defaultPageLimit
@@ -407,7 +419,10 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 	}
 	deposits, err := s.storage.GetPendingTransactions(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
 	if err != nil {
-		return nil, err
+		return &pb.CommonTransactionsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
 	}
 
 	var pbTransactions []*pb.Transaction
@@ -429,14 +444,15 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 		}
 		pbTransactions = append(pbTransactions, transaction)
 	}
-	return &pb.GetPendingTransactionsResponse{
-		Transactions: pbTransactions,
+	return &pb.CommonTransactionsResponse{
+		Code: defaultSuccessCode,
+		Data: pbTransactions,
 	}, nil
 }
 
 // GetAllTransactions returns all the transactions of an account, similar to GetBridges
 // Bridge rest API endpoint
-func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.CommonGetAllTransactionsResponse, error) {
+func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
 		limit = s.defaultPageLimit
@@ -447,7 +463,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 
 	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
 	if err != nil {
-		return &pb.CommonGetAllTransactionsResponse{
+		return &pb.CommonTransactionsResponse{
 			Code: defaultErrorCode,
 			Data: nil,
 		}, nil
@@ -473,7 +489,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			transaction.Status = 1 // Ready but not claimed
 			if err != nil {
 				if !errors.Is(err, gerror.ErrStorageNotFound) {
-					return &pb.CommonGetAllTransactionsResponse{
+					return &pb.CommonTransactionsResponse{
 						Code: defaultErrorCode,
 						Data: nil,
 					}, nil
@@ -487,7 +503,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 		pbTransactions = append(pbTransactions, transaction)
 	}
 
-	return &pb.CommonGetAllTransactionsResponse{
+	return &pb.CommonTransactionsResponse{
 		Code: defaultSuccessCode,
 		Data: pbTransactions,
 	}, nil
