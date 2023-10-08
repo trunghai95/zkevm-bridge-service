@@ -302,5 +302,5 @@ message CommonGetAllTransactionsResponse {
     string error_code = 3;
     string error_message = 4;
     string detailMsg = 5;
-    repeated Transaction transactions = 6;
+    repeated Transaction data = 6;
 }
