@@ -448,8 +448,8 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
 	if err != nil {
 		return &pb.CommonGetAllTransactionsResponse{
-			Code:         defaultErrorCode,
-			Transactions: nil,
+			Code: defaultErrorCode,
+			Data: nil,
 		}, nil
 	}
 
@@ -474,8 +474,8 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			if err != nil {
 				if !errors.Is(err, gerror.ErrStorageNotFound) {
 					return &pb.CommonGetAllTransactionsResponse{
-						Code:         defaultErrorCode,
-						Transactions: nil,
+						Code: defaultErrorCode,
+						Data: nil,
 					}, nil
 				}
 			} else {
@@ -488,7 +488,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 	}
 
 	return &pb.CommonGetAllTransactionsResponse{
-		Code:         defaultSuccessCode,
-		Transactions: pbTransactions,
+		Code: defaultSuccessCode,
+		Data: pbTransactions,
 	}, nil
 }
