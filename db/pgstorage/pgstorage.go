@@ -205,8 +205,8 @@ func (p *PostgresStorage) GetClaim(ctx context.Context, depositCount, networkID 
 		claim  etherman.Claim
 		amount string
 	)
-	const getClaimSQL = "SELECT index, orig_net, orig_addr, amount, dest_addr, block_id, network_id, tx_hash FROM sync.claim WHERE index = $1 AND network_id = $2"
-	err := p.getExecQuerier(dbTx).QueryRow(ctx, getClaimSQL, depositCount, networkID).Scan(&claim.Index, &claim.OriginalNetwork, &claim.OriginalAddress, &amount, &claim.DestinationAddress, &claim.BlockID, &claim.NetworkID, &claim.TxHash)
+	const getClaimSQL = "SELECT index, orig_net, orig_addr, amount, dest_addr, block_id, c.network_id, tx_hash, b.receive_at FROM sync.claim as c INNER JOIN sync.block as b ON c.network_id = b.network_id AND c.block_id = b.id WHERE index = $1 AND network_id = $2"
+	err := p.getExecQuerier(dbTx).QueryRow(ctx, getClaimSQL, depositCount, networkID).Scan(&claim.Index, &claim.OriginalNetwork, &claim.OriginalAddress, &amount, &claim.DestinationAddress, &claim.BlockID, &claim.NetworkID, &claim.TxHash, &claim.Time)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, gerror.ErrStorageNotFound
 	}
