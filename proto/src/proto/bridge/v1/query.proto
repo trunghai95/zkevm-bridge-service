@@ -295,3 +295,12 @@ message GetPendingTransactionsResponse {
 message GetAllTransactionsResponse {
     repeated Transaction transactions = 1;
 }
+
+message CommonGetAllTransactionsResponse {
+    uint32 code = 1;
+    string msg = 2;
+    string error_code = 3;
+    string error_message = 4;
+    string detailMsg = 5;
+    repeated Transaction transactions = 6;
+}

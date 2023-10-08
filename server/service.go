@@ -20,6 +20,8 @@ import (
 
 const (
 	defaultTxEstimateTime = 15
+	defaultErrorCode      = 1
+	defaultSuccessCode    = 0
 )
 
 type bridgeService struct {
@@ -434,7 +436,7 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 
 // GetAllTransactions returns all the transactions of an account, similar to GetBridges
 // Bridge rest API endpoint
-func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.GetAllTransactionsResponse, error) {
+func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.CommonGetAllTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
 		limit = s.defaultPageLimit
@@ -445,7 +447,10 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 
 	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
 	if err != nil {
-		return nil, err
+		return &pb.CommonGetAllTransactionsResponse{
+			Code:         defaultErrorCode,
+			Transactions: nil,
+		}, nil
 	}
 
 	var pbTransactions []*pb.Transaction
@@ -468,7 +473,10 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			transaction.Status = 1 // Ready but not claimed
 			if err != nil {
 				if !errors.Is(err, gerror.ErrStorageNotFound) {
-					return nil, err
+					return &pb.CommonGetAllTransactionsResponse{
+						Code:         defaultErrorCode,
+						Transactions: nil,
+					}, nil
 				}
 			} else {
 				transaction.Status = 2 // Claimed
@@ -479,7 +487,8 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 		pbTransactions = append(pbTransactions, transaction)
 	}
 
-	return &pb.GetAllTransactionsResponse{
+	return &pb.CommonGetAllTransactionsResponse{
+		Code:         defaultSuccessCode,
 		Transactions: pbTransactions,
 	}, nil
 }
