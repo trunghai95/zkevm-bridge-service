@@ -102,7 +102,7 @@ service BridgeService {
     }
 
     /// Get all the transactions of an account. Similar to GetBridges but the field names are changed
-    rpc GetAllTransactions(GetAllTransactionsRequest) returns (GetAllTransactionsResponse) {
+    rpc GetAllTransactions(GetAllTransactionsRequest) returns (CommonGetAllTransactionsResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/all/{destAddr}",
             additional_bindings: {
