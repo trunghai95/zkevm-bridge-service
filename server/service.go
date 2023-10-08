@@ -416,7 +416,7 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
 			EstimateTime: defaultTxEstimateTime,
-			Time:         uint64(deposit.Time.Unix()),
+			Time:         uint64(deposit.Time.Unix()) * 1000,
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
@@ -456,7 +456,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
 			EstimateTime: defaultTxEstimateTime,
-			Time:         uint64(deposit.Time.Unix()),
+			Time:         uint64(deposit.Time.Unix()) * 1000,
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
@@ -473,7 +473,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			} else {
 				transaction.Status = 2 // Claimed
 				transaction.ClaimTxHash = claim.TxHash.String()
-				transaction.ClaimTime = uint64(claim.Time.Unix())
+				transaction.ClaimTime = uint64(claim.Time.Unix()) * 1000
 			}
 		}
 		pbTransactions = append(pbTransactions, transaction)
