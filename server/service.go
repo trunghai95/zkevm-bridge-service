@@ -29,7 +29,7 @@ type bridgeService struct {
 	redisStorage     redisstorage.RedisStorage
 	mainCoinsCache   localcache.MainCoinsCache
 	networkIDs       map[uint]uint8
-	chainIDs         map[uint]uint8
+	chainIDs         map[uint]uint16
 	height           uint8
 	defaultPageLimit uint32
 	maxPageLimit     uint32
@@ -41,10 +41,10 @@ type bridgeService struct {
 // NewBridgeService creates new bridge service.
 func NewBridgeService(cfg Config, height uint8, networks []uint, chainIds []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
 	var networkIDs = make(map[uint]uint8)
-	var chainIDs = make(map[uint]uint8)
+	var chainIDs = make(map[uint]uint16)
 	for i, network := range networks {
 		networkIDs[network] = uint8(i)
-		chainIDs[network] = uint8(chainIds[i])
+		chainIDs[network] = uint16(chainIds[i])
 	}
 	cache, err := lru.New[string, [][]byte](cfg.CacheSize)
 	if err != nil {
