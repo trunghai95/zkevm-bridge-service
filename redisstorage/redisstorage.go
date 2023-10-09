@@ -106,12 +106,16 @@ func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.Symbo
 			log.Infof("cannot unmarshal price object[%v] error[%v]", res, err)
 			priceList = append(priceList, &pb.SymbolPrice{ChainId: symbols[i].ChainId, Address: symbols[i].Address})
 		} else {
-			price.Price = rand.Float64()
-			price.Time = uint64(time.Now().UnixMilli())
 			priceList = append(priceList, price)
 		}
 	}
 
+	if s.mockPrice {
+		for _, price := range priceList {
+			price.Price = rand.Float64()
+			price.Time = uint64(time.Now().UnixMilli())
+		}
+	}
 	return priceList, nil
 }
 
