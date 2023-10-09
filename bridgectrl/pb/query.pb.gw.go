@@ -611,6 +611,7 @@ func request_BridgeService_GetCoinPrice_1(ctx context.Context, marshaler runtime
 
 	msg, err := client.GetCoinPrice(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
+
 }
 
 func local_request_BridgeService_GetCoinPrice_1(ctx context.Context, marshaler runtime.Marshaler, server BridgeServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
