@@ -37,7 +37,7 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 		return nil, errors.Wrap(err, "cannot connect to redis server")
 	}
 	log.Debugf("redis health check done, result: %v", res)
-	return &redisStorageImpl{client: client, mockPrice: cfg.mockPrice}, nil
+	return &redisStorageImpl{client: client, mockPrice: cfg.MockPrice}, nil
 }
 
 func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.SymbolPrice) error {
