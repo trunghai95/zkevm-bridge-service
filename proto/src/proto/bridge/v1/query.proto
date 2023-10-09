@@ -74,10 +74,12 @@ service BridgeService {
     /// Get the latest price of the specified coins
     rpc GetCoinPrice(GetCoinPriceRequest) returns (CommonCoinPricesResponse) {
         option (google.api.http) = {
-            get: "/priapi/v1/ob/bridge/coin-price",
+            post: "/priapi/v1/ob/bridge/coin-price",
             additional_bindings: {
-                get: "/coin-price"
-            }
+                post: "/coin-price",
+                body: "*",
+            },
+            body: "*",
         };
     }
 
