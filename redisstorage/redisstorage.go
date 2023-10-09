@@ -9,6 +9,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -123,5 +124,5 @@ func getCoinPriceKey(chainID uint64, tokenAddr string) string {
 	if tokenAddr == "" {
 		tokenAddr = "null"
 	}
-	return strconv.FormatUint(chainID, 10) + "_" + tokenAddr
+	return strings.ToLower(strconv.FormatUint(chainID, 10) + "_" + tokenAddr)
 }
