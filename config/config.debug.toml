@@ -53,7 +53,7 @@ BridgeVersion = "v1"
     Username = ""
     Password = ""
     DB = 0
-    MOCKPRICE = true
+    MockPrice = true
 
 [CoinKafkaConsumer]
 Brokers = ["localhost:9092"]
