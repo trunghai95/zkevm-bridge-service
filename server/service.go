@@ -20,6 +20,8 @@ import (
 
 const (
 	defaultTxEstimateTime = 15
+	defaultErrorCode      = 1
+	defaultSuccessCode    = 0
 )
 
 type bridgeService struct {
@@ -27,6 +29,7 @@ type bridgeService struct {
 	redisStorage     redisstorage.RedisStorage
 	mainCoinsCache   localcache.MainCoinsCache
 	networkIDs       map[uint]uint8
+	chainIDs         map[uint]uint8
 	height           uint8
 	defaultPageLimit uint32
 	maxPageLimit     uint32
@@ -36,10 +39,12 @@ type bridgeService struct {
 }
 
 // NewBridgeService creates new bridge service.
-func NewBridgeService(cfg Config, height uint8, networks []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
+func NewBridgeService(cfg Config, height uint8, networks []uint, chainIds []uint, storage interface{}, redisStorage redisstorage.RedisStorage, mainCoinsCache localcache.MainCoinsCache) *bridgeService {
 	var networkIDs = make(map[uint]uint8)
+	var chainIDs = make(map[uint]uint8)
 	for i, network := range networks {
 		networkIDs[network] = uint8(i)
+		chainIDs[network] = uint8(chainIds[i])
 	}
 	cache, err := lru.New[string, [][]byte](cfg.CacheSize)
 	if err != nil {
@@ -51,6 +56,7 @@ func NewBridgeService(cfg Config, height uint8, networks []uint, storage interfa
 		mainCoinsCache:   mainCoinsCache,
 		height:           height,
 		networkIDs:       networkIDs,
+		chainIDs:         chainIDs,
 		defaultPageLimit: cfg.DefaultPageLimit,
 		maxPageLimit:     cfg.MaxPageLimit,
 		version:          cfg.BridgeVersion,
@@ -355,13 +361,17 @@ func (s *bridgeService) GetTokenWrapped(ctx context.Context, req *pb.GetTokenWra
 
 // GetCoinPrice returns the price for each coin symbol in the request
 // Bridge rest API endpoint
-func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.GetCoinPriceResponse, error) {
+func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRequest) (*pb.CommonCoinPricesResponse, error) {
 	log.Debugf("GetCoinPrice chainID[%v] address[%v]", req.ChainId, req.Address)
 	// Due to GRPC gateway limitations, we cannot use a list of struct objects in the query params
 	// So instead we will accept 2 separate list of chainIds and addresses in the request, and convert it to SymbolInfo
 	// Need to make sure the number of chainIds and addresses are the same
 	if len(req.ChainId) != len(req.Address) {
-		return nil, errors.New("chainId list and address list must have the same length")
+		return &pb.CommonCoinPricesResponse{
+			Code: defaultErrorCode,
+			Msg:  "chainId list and address list must have the same length",
+			Data: nil,
+		}, nil
 	}
 	symbols := make([]*pb.SymbolInfo, len(req.ChainId))
 	for i := range req.ChainId {
@@ -370,28 +380,36 @@ func (s *bridgeService) GetCoinPrice(ctx context.Context, req *pb.GetCoinPriceRe
 
 	priceList, err := s.redisStorage.GetCoinPrice(ctx, symbols)
 	if err != nil {
-		return nil, err
+		return &pb.CommonCoinPricesResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
 	}
-	return &pb.GetCoinPriceResponse{
-		Prices: priceList,
+	return &pb.CommonCoinPricesResponse{
+		Code: defaultSuccessCode,
+		Data: priceList,
 	}, nil
 }
 
 // GetMainCoins returns the info of the main coins in a network
 // Bridge rest API endpoint
-func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.GetMainCoinsResponse, error) {
+func (s *bridgeService) GetMainCoins(ctx context.Context, req *pb.GetMainCoinsRequest) (*pb.CommonCoinsResponse, error) {
 	coins, err := s.mainCoinsCache.GetMainCoinsByNetwork(ctx, req.NetworkId)
 	if err != nil {
-		return nil, err
+		return &pb.CommonCoinsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
 	}
-	return &pb.GetMainCoinsResponse{
-		CoinInfos: coins,
+	return &pb.CommonCoinsResponse{
+		Code: defaultSuccessCode,
+		Data: coins,
 	}, nil
 }
 
 // GetPendingTransactions returns the pending transactions of an account
 // Bridge rest API endpoint
-func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.GetPendingTransactionsResponse, error) {
+func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetPendingTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
 		limit = s.defaultPageLimit
@@ -399,9 +417,18 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 	if limit > s.maxPageLimit {
 		limit = s.maxPageLimit
 	}
-	deposits, err := s.storage.GetPendingTransactions(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
+
+	deposits, err := s.storage.GetPendingTransactions(ctx, req.DestAddr, uint(limit+1), uint(req.Offset), nil)
 	if err != nil {
-		return nil, err
+		return &pb.CommonTransactionsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
+	}
+
+	hasNext := len(deposits) > int(limit)
+	if hasNext {
+		deposits = deposits[:limit]
 	}
 
 	var pbTransactions []*pb.Transaction
@@ -412,8 +439,10 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
 			EstimateTime: defaultTxEstimateTime,
-			Time:         uint64(deposit.Time.Unix()),
+			Time:         uint64(deposit.Time.UnixMilli()),
 			TxHash:       deposit.TxHash.String(),
+			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
+			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 		}
 		transaction.Status = 0
 		if deposit.ReadyForClaim {
@@ -421,14 +450,15 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 		}
 		pbTransactions = append(pbTransactions, transaction)
 	}
-	return &pb.GetPendingTransactionsResponse{
-		Transactions: pbTransactions,
+	return &pb.CommonTransactionsResponse{
+		Code: defaultSuccessCode,
+		Data: &pb.TransactionDetail{HasNext: hasNext, Transactions: pbTransactions},
 	}, nil
 }
 
 // GetAllTransactions returns all the transactions of an account, similar to GetBridges
 // Bridge rest API endpoint
-func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.GetAllTransactionsResponse, error) {
+func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTransactionsRequest) (*pb.CommonTransactionsResponse, error) {
 	limit := req.Limit
 	if limit == 0 {
 		limit = s.defaultPageLimit
@@ -437,9 +467,17 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 		limit = s.maxPageLimit
 	}
 
-	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit), uint(req.Offset), nil)
+	deposits, err := s.storage.GetDeposits(ctx, req.DestAddr, uint(limit+1), uint(req.Offset), nil)
 	if err != nil {
-		return nil, err
+		return &pb.CommonTransactionsResponse{
+			Code: defaultErrorCode,
+			Data: nil,
+		}, nil
+	}
+
+	hasNext := len(deposits) > int(limit)
+	if hasNext {
+		deposits = deposits[0:limit]
 	}
 
 	var pbTransactions []*pb.Transaction
@@ -450,8 +488,10 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
 			EstimateTime: defaultTxEstimateTime,
-			Time:         uint64(deposit.Time.Unix()),
+			Time:         uint64(deposit.Time.UnixMilli()),
 			TxHash:       deposit.TxHash.String(),
+			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
+			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 		}
 		transaction.Status = 0 // Not ready for claim
 		if deposit.ReadyForClaim {
@@ -460,18 +500,22 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			transaction.Status = 1 // Ready but not claimed
 			if err != nil {
 				if !errors.Is(err, gerror.ErrStorageNotFound) {
-					return nil, err
+					return &pb.CommonTransactionsResponse{
+						Code: defaultErrorCode,
+						Data: nil,
+					}, nil
 				}
 			} else {
 				transaction.Status = 2 // Claimed
 				transaction.ClaimTxHash = claim.TxHash.String()
-				transaction.ClaimTime = uint64(claim.Time.Unix())
+				transaction.ClaimTime = uint64(claim.Time.UnixMilli())
 			}
 		}
 		pbTransactions = append(pbTransactions, transaction)
 	}
 
-	return &pb.GetAllTransactionsResponse{
-		Transactions: pbTransactions,
+	return &pb.CommonTransactionsResponse{
+		Code: defaultSuccessCode,
+		Data: &pb.TransactionDetail{HasNext: hasNext, Transactions: pbTransactions},
 	}, nil
 }
