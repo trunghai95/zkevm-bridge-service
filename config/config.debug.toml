@@ -23,7 +23,7 @@ FreeGas = true
 L1URL = "http://localhost:8545"
 L2URLs = ["http://localhost:8123"]
 L1ChainId = 5
-L2ChainIds = [195]
+L2ChainIds = [1001]
 
 [Synchronizer]
 SyncInterval = "1s"
@@ -53,6 +53,7 @@ BridgeVersion = "v1"
     Username = ""
     Password = ""
     DB = 0
+    MockPrice = true
 
 [CoinKafkaConsumer]
 Brokers = ["localhost:9092"]

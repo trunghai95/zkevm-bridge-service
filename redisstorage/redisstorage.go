@@ -7,7 +7,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/encoding/protojson"
+	"math/rand"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -16,7 +19,8 @@ const (
 
 // redisStorageImpl implements RedisStorage interface
 type redisStorageImpl struct {
-	client *redis.Client
+	client    *redis.Client
+	mockPrice bool
 }
 
 func NewRedisStorage(cfg Config) (RedisStorage, error) {
@@ -34,7 +38,7 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 		return nil, errors.Wrap(err, "cannot connect to redis server")
 	}
 	log.Debugf("redis health check done, result: %v", res)
-	return &redisStorageImpl{client: client}, nil
+	return &redisStorageImpl{client: client, mockPrice: cfg.MockPrice}, nil
 }
 
 func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.SymbolPrice) error {
@@ -107,6 +111,12 @@ func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.Symbo
 		}
 	}
 
+	if s.mockPrice {
+		for _, price := range priceList {
+			price.Price = rand.Float64()
+			price.Time = uint64(time.Now().UnixMilli())
+		}
+	}
 	return priceList, nil
 }
 
@@ -114,5 +124,5 @@ func getCoinPriceKey(chainID uint64, tokenAddr string) string {
 	if tokenAddr == "" {
 		tokenAddr = "null"
 	}
-	return strconv.FormatUint(chainID, 10) + "_" + tokenAddr
+	return strings.ToLower(strconv.FormatUint(chainID, 10) + "_" + tokenAddr)
 }
