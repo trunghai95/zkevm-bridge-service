@@ -7,7 +7,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/encoding/protojson"
+	"math/rand"
 	"strconv"
+	"time"
 )
 
 const (
@@ -16,7 +18,8 @@ const (
 
 // redisStorageImpl implements RedisStorage interface
 type redisStorageImpl struct {
-	client *redis.Client
+	client    *redis.Client
+	mockPrice bool
 }
 
 func NewRedisStorage(cfg Config) (RedisStorage, error) {
@@ -34,7 +37,7 @@ func NewRedisStorage(cfg Config) (RedisStorage, error) {
 		return nil, errors.Wrap(err, "cannot connect to redis server")
 	}
 	log.Debugf("redis health check done, result: %v", res)
-	return &redisStorageImpl{client: client}, nil
+	return &redisStorageImpl{client: client, mockPrice: cfg.mockPrice}, nil
 }
 
 func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.SymbolPrice) error {
@@ -103,6 +106,10 @@ func (s *redisStorageImpl) GetCoinPrice(ctx context.Context, symbols []*pb.Symbo
 			log.Infof("cannot unmarshal price object[%v] error[%v]", res, err)
 			priceList = append(priceList, &pb.SymbolPrice{ChainId: symbols[i].ChainId, Address: symbols[i].Address})
 		} else {
+			if s.mockPrice {
+				price.Price = rand.Float64()
+				price.Time = uint64(time.Now().UnixMilli())
+			}
 			priceList = append(priceList, price)
 		}
 	}

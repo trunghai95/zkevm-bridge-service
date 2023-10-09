@@ -13,4 +13,6 @@ type Config struct {
 
 	// DB index
 	DB int `mapstructure:"DB"`
+
+	mockPrice bool `mapstructure:"mockPrice"`
 }
