@@ -306,8 +306,8 @@ func (s *bridgeService) GetProof(ctx context.Context, req *pb.GetProofRequest) (
 	}, nil
 }
 
-func (s *bridgeService) GetSmtProof(ctx context.Context, req *pb.GetProofRequest) (*pb.CommonProofResponse, error) {
-	globalExitRoot, merkleProof, err := s.GetClaimProof(uint(req.DepositCnt), uint(req.NetId), nil)
+func (s *bridgeService) GetSmtProof(ctx context.Context, req *pb.GetSmtProofRequest) (*pb.CommonProofResponse, error) {
+	globalExitRoot, merkleProof, err := s.GetClaimProof(uint(req.Index), uint(req.FromChain), nil)
 	if err != nil {
 		return &pb.CommonProofResponse{
 			Code:        defaultErrorCode,

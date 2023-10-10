@@ -60,7 +60,7 @@ type BridgeServiceClient interface {
 	GetPendingTransactions(ctx context.Context, in *GetPendingTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error)
 	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
 	GetAllTransactions(ctx context.Context, in *GetAllTransactionsRequest, opts ...grpc.CallOption) (*CommonTransactionsResponse, error)
-	GetSmtProof(ctx context.Context, in *GetProofRequest, opts ...grpc.CallOption) (*CommonProofResponse, error)
+	GetSmtProof(ctx context.Context, in *GetSmtProofRequest, opts ...grpc.CallOption) (*CommonProofResponse, error)
 }
 
 type bridgeServiceClient struct {
@@ -161,7 +161,7 @@ func (c *bridgeServiceClient) GetAllTransactions(ctx context.Context, in *GetAll
 	return out, nil
 }
 
-func (c *bridgeServiceClient) GetSmtProof(ctx context.Context, in *GetProofRequest, opts ...grpc.CallOption) (*CommonProofResponse, error) {
+func (c *bridgeServiceClient) GetSmtProof(ctx context.Context, in *GetSmtProofRequest, opts ...grpc.CallOption) (*CommonProofResponse, error) {
 	out := new(CommonProofResponse)
 	err := c.cc.Invoke(ctx, BridgeService_GetSmtProof_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -195,7 +195,7 @@ type BridgeServiceServer interface {
 	GetPendingTransactions(context.Context, *GetPendingTransactionsRequest) (*CommonTransactionsResponse, error)
 	// / Get all the transactions of an account. Similar to GetBridges but the field names are changed
 	GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonTransactionsResponse, error)
-	GetSmtProof(context.Context, *GetProofRequest) (*CommonProofResponse, error)
+	GetSmtProof(context.Context, *GetSmtProofRequest) (*CommonProofResponse, error)
 }
 
 // UnimplementedBridgeServiceServer should be embedded to have forward compatible implementations.
@@ -232,7 +232,7 @@ func (UnimplementedBridgeServiceServer) GetPendingTransactions(context.Context, 
 func (UnimplementedBridgeServiceServer) GetAllTransactions(context.Context, *GetAllTransactionsRequest) (*CommonTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllTransactions not implemented")
 }
-func (UnimplementedBridgeServiceServer) GetSmtProof(context.Context, *GetProofRequest) (*CommonProofResponse, error) {
+func (UnimplementedBridgeServiceServer) GetSmtProof(context.Context, *GetSmtProofRequest) (*CommonProofResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSmtProof not implemented")
 }
 
@@ -428,7 +428,7 @@ func _BridgeService_GetAllTransactions_Handler(srv interface{}, ctx context.Cont
 }
 
 func _BridgeService_GetSmtProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProofRequest)
+	in := new(GetSmtProofRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -440,7 +440,7 @@ func _BridgeService_GetSmtProof_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: BridgeService_GetSmtProof_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BridgeServiceServer).GetSmtProof(ctx, req.(*GetProofRequest))
+		return srv.(BridgeServiceServer).GetSmtProof(ctx, req.(*GetSmtProofRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -113,7 +113,7 @@ service BridgeService {
         };
     }
 
-    rpc GetSmtProof(GetProofRequest) returns (CommonProofResponse) {
+    rpc GetSmtProof(GetSmtProofRequest) returns (CommonProofResponse) {
         option (google.api.http) = {
             get: "/priapi/v1/ob/bridge/smt-proof",
             additional_bindings: {
@@ -354,4 +354,9 @@ message ProofDetail {
     repeated string smtProof = 1;
     string mainnetExitRoot = 2;
     string rollupExitRoot = 3;
+}
+
+message GetSmtProofRequest {
+    uint32 index = 1;
+    uint64 fromChain = 2;
 }
