@@ -306,6 +306,29 @@ func (s *bridgeService) GetProof(ctx context.Context, req *pb.GetProofRequest) (
 	}, nil
 }
 
+func (s *bridgeService) GetSmtProof(ctx context.Context, req *pb.GetProofRequest) (*pb.CommonProofResponse, error) {
+	globalExitRoot, merkleProof, err := s.GetClaimProof(uint(req.DepositCnt), uint(req.NetId), nil)
+	if err != nil {
+		return &pb.CommonProofResponse{
+			Code:        defaultErrorCode,
+			ProofDetail: nil,
+		}, nil
+	}
+	var proof []string
+	for i := 0; i < len(merkleProof); i++ {
+		proof = append(proof, "0x"+hex.EncodeToString(merkleProof[i][:]))
+	}
+
+	return &pb.CommonProofResponse{
+		Code: defaultSuccessCode,
+		ProofDetail: &pb.ProofDetail{
+			SmtProof:        proof,
+			MainnetExitRoot: globalExitRoot.ExitRoots[0].Hex(),
+			RollupExitRoot:  globalExitRoot.ExitRoots[1].Hex(),
+		},
+	}, nil
+}
+
 // GetBridge returns the bridge  with status whether it is able to send a claim transaction or not.
 // Bridge rest API endpoint
 func (s *bridgeService) GetBridge(ctx context.Context, req *pb.GetBridgeRequest) (*pb.GetBridgeResponse, error) {
@@ -427,6 +450,8 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 			Id:           deposit.Id,
+			Index:        uint64(deposit.DepositCount),
+			Metadata:     "0x" + hex.EncodeToString(deposit.Metadata),
 		}
 		transaction.Status = 0
 		if deposit.ReadyForClaim {
@@ -477,6 +502,8 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
 			Id:           deposit.Id,
+			Index:        uint64(deposit.DepositCount),
+			Metadata:     "0x" + hex.EncodeToString(deposit.Metadata),
 		}
 		transaction.Status = 0 // Not ready for claim
 		if deposit.ReadyForClaim {

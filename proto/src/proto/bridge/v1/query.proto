@@ -112,6 +112,15 @@ service BridgeService {
             }
         };
     }
+
+    rpc GetSmtProof(GetProofRequest) returns (CommonProofResponse) {
+        option (google.api.http) = {
+            get: "/priapi/v1/ob/bridge/smt-proof",
+            additional_bindings: {
+                get: "/smt-proof"
+            }
+        };
+    }
 }
 
 // TokenWrapped message
@@ -201,6 +210,8 @@ message Transaction {
     uint32 fromChainId = 11;
     uint32 toChainId = 12;
     uint64 id = 13;
+    uint64 index = 14;
+    string metadata = 15;
 }
 
 // Get requests
@@ -328,4 +339,19 @@ message CommonCoinPricesResponse {
 message TransactionDetail {
     bool hasNext = 1;
     repeated Transaction transactions = 2;
+}
+
+message CommonProofResponse {
+    uint32 code = 1;
+    string msg = 2;
+    string error_code = 3;
+    string error_message = 4;
+    string detailMsg = 5;
+    ProofDetail proofDetail = 6;
+}
+
+message ProofDetail {
+    repeated string smtProof = 1;
+    string mainnetExitRoot = 2;
+    string rollupExitRoot = 3;
 }
