@@ -200,6 +200,7 @@ message Transaction {
     uint64 claimTime = 10; // Claim's block time
     uint32 fromChainId = 11;
     uint32 toChainId = 12;
+    uint64 id = 13;
 }
 
 // Get requests

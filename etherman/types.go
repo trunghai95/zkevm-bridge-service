@@ -46,6 +46,7 @@ type Deposit struct {
 	// it is only used for the bridge service
 	ReadyForClaim bool
 	Time          time.Time
+	Id            uint64
 }
 
 // Claim struct
