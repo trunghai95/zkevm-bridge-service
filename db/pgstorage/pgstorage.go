@@ -433,7 +433,7 @@ func (p *PostgresStorage) GetClaims(ctx context.Context, destAddr string, limit 
 // GetDeposits gets the deposit list which be smaller than depositCount.
 func (p *PostgresStorage) GetDeposits(ctx context.Context, destAddr string, limit uint, offset uint, dbTx pgx.Tx) ([]*etherman.Deposit, error) {
 	getDepositsSQL := fmt.Sprintf(`
-		SELECT leaf_type, orig_net, orig_addr, amount, dest_net, dest_addr, deposit_cnt, block_id, b.block_num, d.network_id, tx_hash, metadata, ready_for_claim, b.received_at
+		SELECT d.id, leaf_type, orig_net, orig_addr, amount, dest_net, dest_addr, deposit_cnt, block_id, b.block_num, d.network_id, tx_hash, metadata, ready_for_claim, b.received_at
 		FROM sync.deposit%[1]v as d INNER JOIN sync.block%[1]v as b ON d.network_id = b.network_id AND d.block_id = b.id
 		WHERE dest_addr = $1
 		ORDER BY d.block_id DESC, d.deposit_cnt DESC LIMIT $2 OFFSET $3`, p.tableSuffix)
@@ -449,7 +449,7 @@ func (p *PostgresStorage) GetDeposits(ctx context.Context, destAddr string, limi
 			deposit etherman.Deposit
 			amount  string
 		)
-		err = rows.Scan(&deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress,
+		err = rows.Scan(&deposit.Id, &deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress,
 			&deposit.DepositCount, &deposit.BlockID, &deposit.BlockNumber, &deposit.NetworkID, &deposit.TxHash, &deposit.Metadata, &deposit.ReadyForClaim, &deposit.Time)
 		if err != nil {
 			return nil, err
@@ -463,7 +463,7 @@ func (p *PostgresStorage) GetDeposits(ctx context.Context, destAddr string, limi
 
 // GetPendingTransactions gets all the deposit transactions of a user that have not been claimed
 func (p *PostgresStorage) GetPendingTransactions(ctx context.Context, destAddr string, limit uint, offset uint, dbTx pgx.Tx) ([]*etherman.Deposit, error) {
-	getDepositsSQL := fmt.Sprintf(`SELECT leaf_type, orig_net, orig_addr, amount, dest_net, dest_addr, deposit_cnt, block_id, b.block_num, d.network_id, tx_hash, metadata, ready_for_claim, b.received_at
+	getDepositsSQL := fmt.Sprintf(`SELECT d.id, leaf_type, orig_net, orig_addr, amount, dest_net, dest_addr, deposit_cnt, block_id, b.block_num, d.network_id, tx_hash, metadata, ready_for_claim, b.received_at
 		FROM sync.deposit%[1]v as d INNER JOIN sync.block%[1]v as b ON d.network_id = b.network_id AND d.block_id = b.id
 		WHERE dest_addr = $1 AND NOT EXISTS
 			(SELECT 1 FROM sync.claim%[1]v as c WHERE c.index = d.deposit_cnt AND c.network_id = d.dest_net)
@@ -481,7 +481,7 @@ func (p *PostgresStorage) GetPendingTransactions(ctx context.Context, destAddr s
 			deposit etherman.Deposit
 			amount  string
 		)
-		err = rows.Scan(&deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress,
+		err = rows.Scan(&deposit.Id, &deposit.LeafType, &deposit.OriginalNetwork, &deposit.OriginalAddress, &amount, &deposit.DestinationNetwork, &deposit.DestinationAddress,
 			&deposit.DepositCount, &deposit.BlockID, &deposit.BlockNumber, &deposit.NetworkID, &deposit.TxHash, &deposit.Metadata, &deposit.ReadyForClaim, &deposit.Time)
 		if err != nil {
 			return nil, err
