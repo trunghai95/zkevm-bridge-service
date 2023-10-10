@@ -426,6 +426,7 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
+			Id:           deposit.Id,
 		}
 		transaction.Status = 0
 		if deposit.ReadyForClaim {
@@ -475,6 +476,7 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
 			ToChainId:    uint32(s.chainIDs[deposit.DestinationNetwork]),
+			Id:           deposit.Id,
 		}
 		transaction.Status = 0 // Not ready for claim
 		if deposit.ReadyForClaim {
