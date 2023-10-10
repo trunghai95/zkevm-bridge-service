@@ -10,6 +10,7 @@ Name = "test_db"
 Host = "zkevm-bridge-db"
 Port = "5432"
 MaxConns = 20
+TableSuffix = ""
 
 [ClaimTxManager]
 Enabled = true
@@ -48,6 +49,7 @@ BridgeVersion = "v1"
     Host = "zkevm-bridge-db"
     Port = "5432"
     MaxConns = 20
+    TableSuffix = ""
     [BridgeServer.Redis]
     Addr = "zkevm-bridge-redis:6379"
     Username = ""
