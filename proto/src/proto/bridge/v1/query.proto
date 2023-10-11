@@ -347,7 +347,7 @@ message CommonProofResponse {
     string error_code = 3;
     string error_message = 4;
     string detailMsg = 5;
-    ProofDetail proofDetail = 6;
+    ProofDetail data = 6;
 }
 
 message ProofDetail {
