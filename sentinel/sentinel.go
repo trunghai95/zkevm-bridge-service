@@ -35,14 +35,12 @@ func InitFileDataSource(filePath string) error {
 				return errors.New("invalid config")
 			}
 			// Load flow rules
-			updated, err := flow.LoadRules(cfg.FlowRules)
+			_, err := flow.LoadRules(cfg.FlowRules)
 			if err != nil {
 				log.Errorf("sentinel load flow rules[%v] err[%v]", cfg.FlowRules, err)
 				return err
 			}
-			if updated {
-				log.Infof("sentinel config updated: %v", cfg)
-			}
+			log.Infof("sentinel config updated: %v", cfg)
 			return nil
 		})
 
