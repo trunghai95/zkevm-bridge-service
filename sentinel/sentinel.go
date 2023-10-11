@@ -18,7 +18,7 @@ func InitFileDataSource(filePath string) error {
 	// Handler to handle the config update
 	propertyHandler := datasource.NewDefaultPropertyHandler(
 		func(src []byte) (interface{}, error) {
-			log.Debugf("sentinel raw config received: %v", src)
+			log.Debugf("sentinel raw config received: %v", string(src))
 			cfg := &Config{}
 			err := json.Unmarshal(src, cfg)
 			if err != nil {
