@@ -310,8 +310,8 @@ func (s *bridgeService) GetSmtProof(ctx context.Context, req *pb.GetSmtProofRequ
 	globalExitRoot, merkleProof, err := s.GetClaimProof(uint(req.Index), uint(req.FromChain), nil)
 	if err != nil {
 		return &pb.CommonProofResponse{
-			Code:        defaultErrorCode,
-			ProofDetail: nil,
+			Code: defaultErrorCode,
+			Data: nil,
 		}, nil
 	}
 	var proof []string
@@ -321,7 +321,7 @@ func (s *bridgeService) GetSmtProof(ctx context.Context, req *pb.GetSmtProofRequ
 
 	return &pb.CommonProofResponse{
 		Code: defaultSuccessCode,
-		ProofDetail: &pb.ProofDetail{
+		Data: &pb.ProofDetail{
 			SmtProof:        proof,
 			MainnetExitRoot: globalExitRoot.ExitRoots[0].Hex(),
 			RollupExitRoot:  globalExitRoot.ExitRoots[1].Hex(),
