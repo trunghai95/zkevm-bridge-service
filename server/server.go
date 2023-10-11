@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"google.golang.org/protobuf/encoding/protojson"
 	"net"
 	"net/http"
 	"os"
@@ -11,11 +12,11 @@ import (
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	sentinelGrpc "github.com/alibaba/sentinel-golang/pkg/adapters/grpc"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // RunServer runs gRPC server and HTTP gateway
@@ -74,7 +75,7 @@ func runGRPCServer(ctx context.Context, bridgeServer pb.BridgeServiceServer, por
 		return err
 	}
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.UnaryInterceptor(sentinelGrpc.NewUnaryServerInterceptor()))
 	pb.RegisterBridgeServiceServer(server, bridgeServer)
 
 	healthService := newHealthChecker()

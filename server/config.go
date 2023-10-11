@@ -23,4 +23,6 @@ type Config struct {
 	DB db.Config `mapstructure:"DB"`
 	// Redis is the redis connection config
 	Redis redisstorage.Config `mapstructure:"Redis"`
+	// SentinelConfigFilePath is the file path to store the sentinel config
+	SentinelConfigFilePath string `mapstructure:"SentinelConfigFilePath"`
 }

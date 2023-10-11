@@ -150,6 +150,7 @@ services:
     volumes:
       - ./test/test.keystore.claimtx:/pk/keystore.claimtxmanager
       - ./config/config.local.toml:/app/config.toml
+      - ./sentinel/config.json:/app/sentinel_config.json
     command:
       - "/bin/sh"
       - "-c"

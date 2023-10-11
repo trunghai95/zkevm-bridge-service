@@ -4,6 +4,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-bridge-service/coinmiddleware"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/localcache"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/redisstorage"
+	"github.com/0xPolygonHermez/zkevm-bridge-service/sentinel"
 	"os"
 	"os/signal"
 
@@ -24,6 +25,12 @@ func startServer(ctx *cli.Context) error {
 	c, err := initCommon(ctx)
 	if err != nil {
 		return err
+	}
+
+	// Init sentinel
+	err = sentinel.InitFileDataSource(c.BridgeServer.SentinelConfigFilePath)
+	if err != nil {
+		log.Infof("init sentinel error[%v]; ignored and proceed with no sentinel config", err)
 	}
 
 	err = db.RunMigrations(c.SyncDB)
