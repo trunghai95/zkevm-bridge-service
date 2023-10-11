@@ -19,7 +19,7 @@ func InitFileDataSource(filePath string) error {
 	propertyHandler := datasource.NewDefaultPropertyHandler(
 		func(src []byte) (interface{}, error) {
 			log.Debugf("sentinel raw config received: %v", string(src))
-			cfg := &Config{}
+			cfg := &Config{FlowRules: make([]*flow.Rule, 0)}
 			err := json.Unmarshal(src, cfg)
 			if err != nil {
 				log.Errorf("fail to unmarshal sentinel config[%v] err[%v]", src, err)
