@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-bridge-service/bridgectrl/pb"
@@ -96,10 +95,11 @@ func runGRPCServer(ctx context.Context, bridgeServer pb.BridgeServiceServer, por
 }
 
 func preflightHandler(w http.ResponseWriter, r *http.Request) {
-	headers := []string{"Content-Type", "Accept", "X-Locale", "X-Utc", "X-Zkdex-Env", "App-Type", "Referer", "User-Agent", "Devid"}
-	w.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
-	methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
-	w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
+	//headers := []string{"Content-Type", "Accept", "X-Locale", "X-Utc", "X-Zkdex-Env", "App-Type", "Referer", "User-Agent", "Devid"}
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	//methods := []string{"GET", "HEAD", "POST", "PUT", "DELETE"}
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 // allowCORS allows Cross Origin Resource Sharing from any origin.
