@@ -67,6 +67,9 @@ func (s *redisStorageImpl) SetCoinPrice(ctx context.Context, prices []*pb.Symbol
 		}
 		valueList = append(valueList, priceKey, priceVal)
 	}
+	if len(valueList) < 2 {
+		return nil
+	}
 	err = s.client.HSet(ctx, coinPriceHashKey, valueList...).Err()
 	if err != nil {
 		return errors.Wrap(err, "SetCoinPrice redis HSet error")
