@@ -1,5 +1,5 @@
 {
-  "flow_rules": [
+  "flowRules": [
     {
       "resource": "/bridge.v1.BridgeService/CheckAPI",
       "controlBehavior": 0,

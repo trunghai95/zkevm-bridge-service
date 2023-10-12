@@ -40,7 +40,6 @@ func InitFileDataSource(filePath string) error {
 				log.Errorf("sentinel load flow rules[%v] err[%v]", cfg.FlowRules, err)
 				return err
 			}
-			log.Infof("sentinel config updated: %v", cfg)
 			return nil
 		})
 

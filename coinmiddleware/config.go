@@ -19,4 +19,7 @@ type Config struct {
 	// Username and Password are used for SASL_SSL authentication
 	Username string `mapstructure:"Username"`
 	Password string `mapstructure:"Password"`
+
+	// RootCAPath points to the CA cert used for authentication
+	RootCAPath string `mapstructure:"RootCAPath"`
 }
