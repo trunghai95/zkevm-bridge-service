@@ -18,9 +18,10 @@ import (
 )
 
 const (
-	defaultTxEstimateTime = 15
-	defaultErrorCode      = 1
-	defaultSuccessCode    = 0
+	defaultL2TxEstimateTime = 15
+	defaultL1TxEstimateTime = 10
+	defaultErrorCode        = 1
+	defaultSuccessCode      = 0
 )
 
 type bridgeService struct {
@@ -439,12 +440,16 @@ func (s *bridgeService) GetPendingTransactions(ctx context.Context, req *pb.GetP
 
 	var pbTransactions []*pb.Transaction
 	for _, deposit := range deposits {
+		defaultTxEstimateTime := defaultL1TxEstimateTime
+		if deposit.NetworkID == 1 {
+			defaultTxEstimateTime = defaultL2TxEstimateTime
+		}
 		transaction := &pb.Transaction{
 			FromChain:    uint32(deposit.NetworkID),
 			ToChain:      uint32(deposit.DestinationNetwork),
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
-			EstimateTime: defaultTxEstimateTime,
+			EstimateTime: uint32(defaultTxEstimateTime),
 			Time:         uint64(deposit.Time.UnixMilli()),
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
@@ -491,12 +496,16 @@ func (s *bridgeService) GetAllTransactions(ctx context.Context, req *pb.GetAllTr
 
 	var pbTransactions []*pb.Transaction
 	for _, deposit := range deposits {
+		defaultTxEstimateTime := defaultL1TxEstimateTime
+		if deposit.NetworkID == 1 {
+			defaultTxEstimateTime = defaultL2TxEstimateTime
+		}
 		transaction := &pb.Transaction{
 			FromChain:    uint32(deposit.NetworkID),
 			ToChain:      uint32(deposit.DestinationNetwork),
 			BridgeToken:  deposit.OriginalAddress.Hex(),
 			TokenAmount:  deposit.Amount.String(),
-			EstimateTime: defaultTxEstimateTime,
+			EstimateTime: uint32(defaultTxEstimateTime),
 			Time:         uint64(deposit.Time.UnixMilli()),
 			TxHash:       deposit.TxHash.String(),
 			FromChainId:  uint32(s.chainIDs[deposit.NetworkID]),
