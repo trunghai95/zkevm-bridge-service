@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	defaultL2TxEstimateTime = 15
-	defaultL1TxEstimateTime = 10
+	defaultL2TxEstimateTime = 60
+	defaultL1TxEstimateTime = 15
 	defaultErrorCode        = 1
 	defaultSuccessCode      = 0
 )
