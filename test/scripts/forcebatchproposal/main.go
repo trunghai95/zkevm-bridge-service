@@ -44,7 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error approving matics: ", err)
 	}
-	tx, err := polygonZkEVM.SequenceBatches(auth, nil, auth.From)
+	tx, err := polygonZkEVM.SequenceBatches(auth, nil, auth.From, nil)
 	if err != nil {
 		log.Fatal("Error sending the batch: ", err)
 	}
