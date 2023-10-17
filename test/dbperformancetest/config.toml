@@ -1,0 +1,73 @@
+[Log]
+Level = "info"
+Outputs = ["stdout"]
+
+[SyncDB]
+Database = "postgres"
+User = "test_user"
+Password = "test_password"
+Name = "test_db"
+Host = "localhost"
+Port = "5435"
+MaxConns = 20
+TableSuffix = "_test"
+
+[ClaimTxManager]
+Enabled = true
+FrequencyToMonitorTxs = "1s"
+PrivateKey = {Path = "../test/test.keystore.sequencer", Password = "testonly"}
+RetryInterval = "1s"
+RetryNumber = 10
+FreeGas = true
+
+[Etherman]
+L1URL = "http://localhost:8545"
+L2URLs = ["http://localhost:8123"]
+L1ChainId = 5
+L2ChainIds = [1001]
+
+[Synchronizer]
+SyncInterval = "1s"
+SyncChunkSize = 100
+
+[BridgeController]
+Store = "postgres"
+Height = 32
+
+[BridgeServer]
+GRPCPort = "9090"
+HTTPPort = "8080"
+CacheSize = 100000
+DefaultPageLimit = 25
+MaxPageLimit = 100
+BridgeVersion = "v1"
+    [BridgeServer.DB]
+    Database = "postgres"
+    User = "test_user"
+    Password = "test_password"
+    Name = "test_db"
+    Host = "localhost"
+    Port = "5435"
+    MaxConns = 20
+    TableSuffix = "_test"
+    [BridgeServer.Redis]
+    Addr = "localhost:6379"
+    Username = ""
+    Password = ""
+    DB = 0
+    MockPrice = true
+
+[CoinKafkaConsumer]
+Brokers = ["localhost:9092"]
+Topics = ["explorer_chainAddressPrice_push"]
+ConsumerGroupID = "xagon-bridge-service"
+InitialOffset = -1
+Username = ""
+Password = ""
+RootCAPath = "/app/root-ca-cert"
+
+[NetworkConfig]
+GenBlockNumber = 1
+PolygonBridgeAddress = "0xff0EE8ea08cEf5cb4322777F5CC3E8A584B8A4A0"
+PolygonZkEVMGlobalExitRootAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
+L2PolygonBridgeAddresses = ["0xff0EE8ea08cEf5cb4322777F5CC3E8A584B8A4A0"]
