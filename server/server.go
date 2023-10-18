@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/encoding/protojson"
 	"net"
 	"net/http"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // RunServer runs gRPC server and HTTP gateway
