@@ -9,7 +9,7 @@ Outputs = ["stdout"]
 User = "state_user"
 Password = "state_password"
 Name = "state_db"
-Host = "zkevm-state-db"
+Host = "xgon-state-db"
 Port = "5432"
 EnableLog = false
 MaxConns = 200
@@ -25,13 +25,13 @@ PollMinAllowedGasPriceInterval = "15s"
 	User = "pool_user"
 	Password = "pool_password"
 	Name = "pool_db"
-	Host = "zkevm-pool-db"
+	Host = "xgon-pool-db"
 	Port = "5432"
 	EnableLog = false
 	MaxConns = 200
 
 [Etherman]
-URL = "http://zkevm-mock-l1-network:8545"
+URL = "http://xgon-mock-l1-network:8545"
 MultiGasProvider = false
 	[Etherman.Etherscan]
 		ApiKey = ""
