@@ -18,8 +18,10 @@ import (
 
 const (
 	configFilePath   = "./config.toml"
-	transactionCount = 1000000
-	userCount        = 1000
+	transactionCount = 5000000
+	claimCount       = 4000000
+	blockCount       = 50000000
+	userCount        = 5000
 	logBatch         = 10000
 	testIteration    = 1000
 )
@@ -27,6 +29,7 @@ const (
 var (
 	isPrepare = flag.Bool("prepare", false, "If prepare is true, run the prepare code to populate the data")
 	isDryRun  = flag.Bool("dryrun", true, "")
+	resetDB   = flag.Bool("reset", false, "If this is true, reset the DB to clean up the data before prepare data")
 )
 
 func main() {
@@ -74,6 +77,22 @@ func main() {
 	}
 
 	if *isPrepare {
+		if *resetDB {
+			cfg := c.SyncDB
+			pgCfg := pgstorage.Config{
+				Name:     cfg.Name,
+				User:     cfg.User,
+				Password: cfg.Password,
+				Host:     cfg.Host,
+				Port:     cfg.Port,
+			}
+			err := pgstorage.InitOrReset(pgCfg)
+			if err != nil {
+				log.Errorf("InitOrReset DB err: %v", err)
+				return
+			}
+		}
+
 		err = prepareData(ctx, storage, dbTx)
 		if err != nil {
 			log.Errorf("prepareData error: %v", err)
@@ -125,6 +144,10 @@ func prepareData(ctx context.Context, storage *pgstorage.PostgresStorage, dbTx p
 			return err
 		}
 
+		if i > claimCount {
+			continue
+		}
+
 		// Add claim block
 		blockNumber++
 		block = &etherman.Block{
@@ -155,6 +178,24 @@ func prepareData(ctx context.Context, storage *pgstorage.PostgresStorage, dbTx p
 		}
 	}
 
+	// Add more block
+	for blockNumber < blockCount {
+		blockNumber++
+		if blockNumber%logBatch == 0 {
+			log.Infof("Adding block #%d", blockNumber)
+		}
+		block := &etherman.Block{
+			BlockNumber: blockNumber,
+			NetworkID:   1,
+			BlockHash:   getHashFromInt(blockNumber),
+			ReceivedAt:  time.Now(),
+		}
+		_, err := storage.AddBlock(ctx, block, dbTx)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -167,7 +208,7 @@ func runTest(ctx context.Context, storage *pgstorage.PostgresStorage, dbTx pgx.T
 			startTime := time.Now()
 			err := fn()
 			if err != nil {
-				log.Errorf("[%v] Iteration #%v error %v", i, err)
+				log.Errorf("[%v] Iteration #%v error %v", name, i, err)
 			}
 			dur := time.Now().Sub(startTime)
 			sumDuration += dur
@@ -204,17 +245,17 @@ func runTest(ctx context.Context, storage *pgstorage.PostgresStorage, dbTx pgx.T
 		return err
 	})
 
-	// GetClaim
-	wrapper("GetClaim", func() error {
-		id := rand.Int()%transactionCount + 1
-		_, err := storage.GetClaim(ctx, uint(id), 1, dbTx)
-		return err
-	})
-
 	// GetDeposit
 	wrapper("GetDeposit", func() error {
 		id := rand.Int()%transactionCount + 1
 		_, err := storage.GetDeposit(ctx, uint(id), 0, dbTx)
+		return err
+	})
+
+	// GetClaim
+	wrapper("GetClaim", func() error {
+		id := rand.Int()%claimCount + 1
+		_, err := storage.GetClaim(ctx, uint(id), 1, dbTx)
 		return err
 	})
 }
