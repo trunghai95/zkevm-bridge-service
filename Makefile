@@ -193,7 +193,6 @@ test-edge: build-docker stop run ## Runs all tests checking race conditions
 	sleep 3
 	docker logs $(DOCKER_COMPOSE_ZKEVM_NODE)
 	docker logs $(DOCKER_COMPOSE_ZKPROVER)
-	docker logs $(DOCKER_COMPOSE_BRIDGE)
 	trap 'docker logs $(DOCKER_COMPOSE_BRIDGE); $(STOP)' EXIT; MallocNanoZone=0 go test -race -p 1 -timeout 2400s ./test/e2e/... -count 1 -tags='edge'
 
 .PHONY: validate

@@ -360,6 +360,7 @@ func (tm *ClaimTxManager) monitorTxs(ctx context.Context) error {
 			gasPrice := big.NewInt(0)
 			if !tm.cfg.FreeGas {
 				gasPrice, err = tm.l2Node.SuggestGasPrice(ctx)
+				log.Debugf("SuggestGasPrice: %v; err: %v", gasPrice.String(), err)
 				if err != nil {
 					mTxLog.Errorf("failed to get suggested gasPrice. Error: %v", err)
 					continue
