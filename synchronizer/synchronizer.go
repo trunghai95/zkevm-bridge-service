@@ -187,6 +187,7 @@ func (s *ClientSynchronizer) syncTrustedState() error {
 			lastBatch.RollupExitRoot,
 		},
 	}
+	log.Debugf("syncTrustedState lastBatchNumber[%v] ger[%+v]", lastBatchNumber, ger)
 	isUpdated, err := s.storage.AddTrustedGlobalExitRoot(s.ctx, ger, nil)
 	if err != nil {
 		log.Error("networkID: %d, error storing latest trusted globalExitRoot. Error: %w", s.networkID, err)

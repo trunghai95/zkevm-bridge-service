@@ -698,7 +698,7 @@ func (m *Manager) WaitExitRootToBeSynced(ctx context.Context, orgExitRoot *ether
 		if isRollup {
 			tID = 1
 		}
-		log.Debugf("WaitExitRootToBeSynced tID[%v] exitRoot[%v] orgExitRoot[%v]", tID, exitRoot, orgExitRoot)
+		log.Debugf("WaitExitRootToBeSynced tID[%v] exitRoot[%+v] orgExitRoot[%+v]", tID, exitRoot, orgExitRoot)
 		return exitRoot.ExitRoots[tID] != orgExitRoot.ExitRoots[tID], nil
 	})
 }
