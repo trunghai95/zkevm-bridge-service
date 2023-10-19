@@ -199,9 +199,10 @@ func (etherMan *Client) updateGlobalExitRootEvent(ctx context.Context, vLog type
 		t := time.Unix(int64(fullBlock.Time()), 0)
 		block := prepareBlock(vLog, t, fullBlock)
 		block.GlobalExitRoots = append(block.GlobalExitRoots, gExitRoot)
-		log.Debugf("[UpdateGlobalExitRoot Event] gExitRoot[%v]", gExitRoot)
+		log.Debugf("[UpdateGlobalExitRoot Event] blockNumber[%v] gExitRoot[%+v]", vLog.BlockNumber, gExitRoot)
 		*blocks = append(*blocks, block)
 	} else if (*blocks)[len(*blocks)-1].BlockHash == vLog.BlockHash && (*blocks)[len(*blocks)-1].BlockNumber == vLog.BlockNumber {
+		log.Debugf("[UpdateGlobalExitRoot Event] same blockNumber[%v] gExitRoot[%+v]", vLog.BlockNumber, gExitRoot)
 		(*blocks)[len(*blocks)-1].GlobalExitRoots = append((*blocks)[len(*blocks)-1].GlobalExitRoots, gExitRoot)
 	} else {
 		log.Error("Error processing UpdateGlobalExitRoot event. BlockHash:", vLog.BlockHash, ". BlockNumber: ", vLog.BlockNumber)
@@ -240,9 +241,10 @@ func (etherMan *Client) depositEvent(ctx context.Context, vLog types.Log, blocks
 		}
 		block := prepareBlock(vLog, time.Unix(int64(fullBlock.Time()), 0), fullBlock)
 		block.Deposits = append(block.Deposits, deposit)
-		log.Debugf("[Deposit Event] deposit[%v]", deposit)
+		log.Debugf("[Deposit Event] blockNumber[%v] deposit[%+v]", vLog.BlockNumber, deposit)
 		*blocks = append(*blocks, block)
 	} else if (*blocks)[len(*blocks)-1].BlockHash == vLog.BlockHash && (*blocks)[len(*blocks)-1].BlockNumber == vLog.BlockNumber {
+		log.Debugf("[Deposit Event] new blockNumber[%v] deposit[%+v]", vLog.BlockNumber, deposit)
 		(*blocks)[len(*blocks)-1].Deposits = append((*blocks)[len(*blocks)-1].Deposits, deposit)
 	} else {
 		log.Error("Error processing deposit event. BlockHash:", vLog.BlockHash, ". BlockNumber: ", vLog.BlockNumber)
@@ -278,9 +280,10 @@ func (etherMan *Client) claimEvent(ctx context.Context, vLog types.Log, blocks *
 		}
 		block := prepareBlock(vLog, time.Unix(int64(fullBlock.Time()), 0), fullBlock)
 		block.Claims = append(block.Claims, claim)
-		log.Debugf("[Claim Event] claim[%v]", claim)
+		log.Debugf("[Claim Event] blockNumber[%v] claim[%+v]", vLog.BlockNumber, claim)
 		*blocks = append(*blocks, block)
 	} else if (*blocks)[len(*blocks)-1].BlockHash == vLog.BlockHash && (*blocks)[len(*blocks)-1].BlockNumber == vLog.BlockNumber {
+		log.Debugf("[Claim Event] new blockNumber[%v] claim[%+v]", vLog.BlockNumber, claim)
 		(*blocks)[len(*blocks)-1].Claims = append((*blocks)[len(*blocks)-1].Claims, claim)
 	} else {
 		log.Error("Error processing claim event. BlockHash:", vLog.BlockHash, ". BlockNumber: ", vLog.BlockNumber)
