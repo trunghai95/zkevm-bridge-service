@@ -25,6 +25,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/pkg/errors"
 )
 
 // NetworkSID is used to identify the network.
@@ -183,11 +184,12 @@ func (m *Manager) SendL2Deposit(ctx context.Context, tokenAddr common.Address, a
 
 	err = client.SendBridgeAsset(ctx, tokenAddr, amount, destNetwork, destAddr, []byte{}, auth)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "SendBridgeAsset")
 	}
 
 	// sync for new exit root
-	return m.WaitExitRootToBeSynced(ctx, orgExitRoot, true)
+	err = m.WaitExitRootToBeSynced(ctx, orgExitRoot, true)
+	return errors.Wrap(err, "WaitExitRootToBeSynced")
 }
 
 // SendL1BridgeMessage bridges a message from l1 to l2.
