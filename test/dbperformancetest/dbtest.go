@@ -4,6 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"math/big"
+	"math/rand"
+	"time"
+
 	"github.com/0xPolygonHermez/zkevm-bridge-service/config"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/db"
 	"github.com/0xPolygonHermez/zkevm-bridge-service/db/pgstorage"
@@ -11,9 +15,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4"
-	"math/big"
-	"math/rand"
-	"time"
 )
 
 const (
